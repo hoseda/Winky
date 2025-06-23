@@ -11,17 +11,16 @@ class Lexer:
         self.tokens = []
     
     def add_token(self,token_type):
-        self.tokens.append(Token(token_type , self.source[self.start:self.curr]))
+        self.tokens.append(Token(token_type , self.source[self.start:self.curr] , self.line))
 
     def advance(self):
         ch = self.source[self.curr]
         self.curr += 1
         return ch
-
-    def peek(self):
-        return self.source[aself.curr]
-
     
+    def peek(self):
+        return self.source[self.curr]
+
     def lookAhead(self , n =1):
         return self.source[self.curr + n]
 
@@ -38,30 +37,60 @@ class Lexer:
             self.start = self.curr
             ch = self.advance()
             
-            #######################################################################
-            ################## Tokenize the Single Characters #####################
-            #######################################################################
+            ########################################################
+            #   Ignoring the Whitespace                            #
+            ########################################################
+            if   ch == '\n': self.line += 1
+            elif ch == '\t': pass
+            elif ch == '\r': pass
+            ########################################################
+            #   Ignoring the Comments                              #
+            ########################################################
+            elif ch == '#' :
+                while self.peek() != '\n':
+                    self.advance()
+            ########################################################
+            #   Single Character lexemes                           #
+            ########################################################
+            elif ch == '+' : self.add_token(TOK_PLUS)
+            elif ch == '-' : self.add_token(TOK_MINUS)
+            elif ch == '*' : self.add_token(TOK_STAR)
+            elif ch == '.' : self.add_token(TOK_DOT)
+            elif ch == '/' : self.add_token(TOK_SLASH)
+            elif ch == '^' : self.add_token(TOK_CARET)
+            elif ch == ',' : self.add_token(TOK_COMMA)
+            elif ch == '%' : self.add_token(TOK_MOD)
+            elif ch == ';' : self.add_token(TOK_SEMICOLON)
+            elif ch == '?' : self.add_token(TOK_QUESTION)
+            elif ch == '(' : self.add_token(TOK_LPAREN) 
+            elif ch == ')' : self.add_token(TOK_RPAREN)
+            elif ch == '{' : self.add_token(TOK_LCURLY)
+            #######################################################
+            #   Two Character lexemes                             #
+            #######################################################
+            elif ch == '=' :
+                if self.match('=') : self.add_token(TOK_EQ)  
+                
+            elif ch == '~' :
+                if self.match('=') : self.add_token(TOK_NE)
+                else : self.add_token(TOK_NOT)
+
+            elif ch == '>' :
+                if self.match('=') : self.add_token(TOK_GE)
+                elif self.match('>') : self.add_token(TOK_GTGT)
+                else: self.add_token(TOK_GT)
+
+            elif ch == '<' :
+                if self.match('=') : self.add_token(TOK_LE)
+                elif self.match('<') : self.add_token(TOK_LTLT)
+                else: self.add_token(TOK_LT)
             
-            if ch == '+' : self.add_token(TOK_PLUS)
-            if ch == '-' : self.add_token(TOK_MINUS)
-            if ch == '*' : self.add_token(TOK_STAR)
-            if ch == '.' : self.add_token(TOK_DOT)
-            if ch == '/' : self.add_token(TOK_SLASH)
-            if ch == '^' : self.add_token(TOK_CARET)
-            if ch == ',' : self.add_token(TOK_COMMA)
-            if ch == '%' : self.add_token(TOK_MOD)
-            if ch == ':' : self.add_token(TOK_COLON)
-            if ch == ';' : self.add_token(TOK_SEMICOLON)
-            if ch == '?' : self.add_token(TOK_QUESTION)
-            if ch == '>' : self.add_token(TOK_GT)
-            if ch == '<' : self.add_token(TOK_LT)
-            if ch == '~' : self.add_token(TOK_NOT)
-            if ch == '(' : self.add_token(TOK_LPAREN) 
-            if ch == ')' : self.add_token(TOK_RPAREN)
-            if ch == '{' : self.add_token(TOK_LCURLY) 
-            if ch == '}' : self.add_token(TOK_RCURLY)
-            if ch == '[' : self.add_token(TOK_LSQUAR)
-            if ch == ']' : self.add_token(TOK_RSQUAR)
+            elif ch == ':' :
+                if self.match('=') : self.add_token(TOK_ASSIGN)
+                else : self.add_token(TOK_COLON)
+
+
 
 
         return self.tokens
+            
