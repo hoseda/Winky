@@ -10,6 +10,7 @@ class Lexer:
         self.line = 1
         self.tokens = []
     
+
     def add_token(self,token_type):
         self.tokens.append(Token(token_type , self.source[self.start:self.curr] , self.line))
 
@@ -19,6 +20,8 @@ class Lexer:
         return ch
     
     def peek(self):
+        if self.curr >= len(self.source):
+            return '\0'
         return self.source[self.curr]
 
     def lookAhead(self , n =1):
@@ -33,6 +36,7 @@ class Lexer:
 
 
     def tokenize(self):
+        print("inside tokenization loop")
         while self.curr < len(self.source):
             self.start = self.curr
             ch = self.advance()
@@ -47,7 +51,7 @@ class Lexer:
             #   Ignoring the Comments                              #
             ########################################################
             elif ch == '#' :
-                while self.peek() != '\n':
+                while self.peek() != '\n' and not(self.curr > len(self.source)):
                     self.advance()
             ########################################################
             #   Single Character lexemes                           #
@@ -88,9 +92,55 @@ class Lexer:
             elif ch == ':' :
                 if self.match('=') : self.add_token(TOK_ASSIGN)
                 else : self.add_token(TOK_COLON)
+            #########################################################
+            #   Tokenize the Integer and Float                      #
+            #########################################################
+            elif ch.isdigit():
+                 while self.peek().isdigit():
+                     if self.curr < len(self.source):
+                        self.advance()
+                     else: return '\0'
+                 if self.peek() ==  '.' and self.lookAhead().isdigit():
+                     self.advance() # consume the dot.
+                     while self.peek().isdigit():
+                         if self.curr < len(self.source):
+                             self.advance()
+                         else: return '\0'
+                     self.add_token(TOK_FLOAT)
+                 else:
+                     self.add_token(TOK_INTEGER)
+            ########################################################
+            #   Tokenize the String that start and end with ""     #
+            ########################################################
+            elif ch == '"':
+                while self.peek() != '"':
+                    if self.curr < len(self.source):
+                        self.advance()
+                    else: return '\0'
+                if self.peek() == '"':
+                    self.advance()
+                    self.add_token(TOK_STRING)
+                else: raise SyntaxError(f"Wrong Syntax line {self.line}")
+            ########################################################
+            #   Tokenize the String that start and end with ''     #
+            ########################################################
+            elif ch == "'":
+                while self.peek() != "'":
+                    if self.curr < len(self.source):
+                        self.advance()
+                    else: return '\0'
+                if self.peek() == "'":
+                    self.advance()
+                    self.add_token(TOK_STRING)
+                else: raise SyntaxError(f"Wrong Syntax line {self.line}")
+            ########################################################
+            #   Tokenize the Identifiers                           #
+            ########################################################
+            elif ch == "_" or ch.isalpha():
+                while self.peek().isalnum() or self.peek() == '_':
+                    if self.curr < len(self.source):
+                        self.advance()
+                    else: return '\0'
+                self.add_token(TOK_IDENTIFIER)
 
-
-
-
-        return self.tokens
-            
+        return self.tokens            

@@ -12,3 +12,17 @@ a ~= b
 >=
 <=
 
+123 + 100 * 12.5 := x
+
+
+"hello my \n friend!"
+
+'hello \t  world!'
+
+_variable1
+variable2
+
+            ########################################################
+hsd_12_@
+
+" hello winke"
