@@ -23,13 +23,13 @@ TOK_QUESTION    =   "TOK_QUESTION"  # ?
 TOK_NOT         =   "TOK_NOT"       # ~
 TOK_GT          =   "TOK_GT"        # >
 TOK_LT          =   "TOK_LT"        # <
-
+TOK_EQ          =   "TOK_EQ"        # =
 # Two Character tokens
 
 TOK_GE          =   "TOK_GE"        # >=
 TOK_LE          =   "TOK_LE"        # <=
 TOK_NE          =   "TOK_NE"        # ~=
-TOK_EQ          =   "TOK_EQ"        # ==
+TOK_EQEQ        =   "TOK_EQEQ"      # ==
 TOK_ASSIGN      =   "TOK_ASSIGN"    # :=
 TOK_GTGT        =   "TOK_GTGT"      # >>
 TOK_LTLT        =   "TOK_LTLT"      # <<
@@ -59,6 +59,32 @@ TOK_END         =   "TOK_END"
 TOK_PRINT       =   "TOK_PRINT"
 TOK_PRINTLN     =   "TOK_PRINTL"
 TOK_RET         =   "TOK_RET"
+
+
+#########################################################################################################################
+#   a Dictionary of Keywords                                                                                            #
+#########################################################################################################################
+
+keywords = {
+    'if'    :   TOK_IF,
+    'else'  :   TOK_ELSE,
+    'then'  :   TOK_THEN,
+    'true'  :   TOK_TRUE,
+    'false' :   TOK_FALSE,
+    'and'   :   TOK_AND,
+    'or'    :   TOK_OR,
+    'while' :   TOK_WHILE,
+    'for'   :   TOK_FOR,
+    'do'    :   TOK_DO,
+    'func'  :   TOK_FUNC,
+    'null'  :   TOK_NULL,
+    'end'   :   TOK_END,
+    'print' :   TOK_PRINT,
+    'println':  TOK_PRINTLN,
+    'ret'   :   TOK_RET,
+}
+
+
 
 #########################################################################################################################
 #   Token class defenition

@@ -47,17 +47,22 @@ class Lexer:
             if   ch == '\n': self.line += 1
             elif ch == '\t': pass
             elif ch == '\r': pass
-            ########################################################
-            #   Ignoring the Comments                              #
-            ########################################################
-            elif ch == '#' :
-                while self.peek() != '\n' and not(self.curr > len(self.source)):
-                    self.advance()
+
             ########################################################
             #   Single Character lexemes                           #
             ########################################################
             elif ch == '+' : self.add_token(TOK_PLUS)
-            elif ch == '-' : self.add_token(TOK_MINUS)
+
+            ########################################################
+            # Ignoring Comments                                    #
+            ########################################################
+
+            elif ch == '-' :
+                if self.peek() == '-':
+                    while self.peek() != '\n' and not(self.curr > len(self.source)):
+                        self.advance()
+                else:
+                    self.add_token(TOK_MINUS)
             elif ch == '*' : self.add_token(TOK_STAR)
             elif ch == '.' : self.add_token(TOK_DOT)
             elif ch == '/' : self.add_token(TOK_SLASH)
@@ -69,11 +74,13 @@ class Lexer:
             elif ch == '(' : self.add_token(TOK_LPAREN) 
             elif ch == ')' : self.add_token(TOK_RPAREN)
             elif ch == '{' : self.add_token(TOK_LCURLY)
+            elif ch == '}' : self.add_token(TOK_RCURLY)
             #######################################################
             #   Two Character lexemes                             #
             #######################################################
             elif ch == '=' :
-                if self.match('=') : self.add_token(TOK_EQ)  
+                if self.match('=') : self.add_token(TOK_EQEQ)
+                else : self.add_token(TOK_EQ)
                 
             elif ch == '~' :
                 if self.match('=') : self.add_token(TOK_NE)
@@ -134,13 +141,20 @@ class Lexer:
                     self.add_token(TOK_STRING)
                 else: raise SyntaxError(f"Wrong Syntax line {self.line}")
             ########################################################
-            #   Tokenize the Identifiers                           #
+            #   Tokenize the Identifiers , Keywords                #
             ########################################################
             elif ch == "_" or ch.isalpha():
                 while self.peek().isalnum() or self.peek() == '_':
                     if self.curr < len(self.source):
                         self.advance()
                     else: return '\0'
-                self.add_token(TOK_IDENTIFIER)
+                text = self.source[self.start:self.curr]
+                key_type = keywords.get(text)
+                if key_type == None:
+                    self.add_token(TOK_IDENTIFIER)
+                else :self.add_token(key_type)
+
+            else:
+                pass
 
         return self.tokens            
