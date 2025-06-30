@@ -1,5 +1,6 @@
 # the lexer codes are here.
 
+from error import WinkyLexerError
 from tokens import *
 
 class Lexer:
@@ -127,7 +128,7 @@ class Lexer:
                 if self.peek() == '"':
                     self.advance()
                     self.add_token(TOK_STRING)
-                else: raise SyntaxError(f"Wrong Syntax line {self.line}")
+                else: WinkyLexerError(f"Unexpected Character" , self.line)
             ########################################################
             #   Tokenize the String that start and end with ''     #
             ########################################################
@@ -139,7 +140,7 @@ class Lexer:
                 if self.peek() == "'":
                     self.advance()
                     self.add_token(TOK_STRING)
-                else: raise SyntaxError(f"Wrong Syntax line {self.line}")
+                else: WinkyLexerError(f"UNexpected Character" , self.line)
             ########################################################
             #   Tokenize the Identifiers , Keywords                #
             ########################################################
@@ -155,6 +156,7 @@ class Lexer:
                 else :self.add_token(key_type)
 
             else:
-                pass
+                curr = ch
+                WinkyLexerError(f"Unkown Character: {curr!r}" , self.line , self.curr)
 
         return self.tokens            
