@@ -44,7 +44,7 @@ class UnOp(Expr):
         self.value = value
 
     def __repr__(self) -> str:
-        return f"Unary Operator [{self.op.lexeme},{self.value}]"
+        return f"Unary Operator ({self.op.lexeme},{self.value})"
 
 
 
@@ -61,7 +61,7 @@ class BinOp(Expr):
         self.right = right
 
     def __repr__(self) -> str:
-        return f"Binary Operator [Operator: [{self.op.lexeme}] , LHS: [{self.left}] , RHS: [{self.right}]]"
+        return f"Binary Operator (Operator: [{self.op.lexeme}] , LHS: [{self.left}] , RHS: [{self.right}])"
 
 
 class Grouping(Expr):
@@ -73,7 +73,7 @@ class Grouping(Expr):
         self.value = value
 
     def __repr__(self) -> str:
-        return f"Grouping( {self.value} )"
+        return f"Grouping({self.value})"
 
 
 class WhileStmt(Stmt):

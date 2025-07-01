@@ -48,6 +48,7 @@ class Lexer:
             if   ch == '\n': self.line += 1
             elif ch == '\t': pass
             elif ch == '\r': pass
+            elif ch == ' ' : pass
 
             ########################################################
             #   Single Character lexemes                           #
@@ -156,7 +157,6 @@ class Lexer:
                 else :self.add_token(key_type)
 
             else:
-                curr = ch
-                WinkyLexerError(f"Unkown Character: {curr!r}" , self.line , self.curr)
+                WinkyLexerError(f"Unexpected Character {ch!r}" , self.line , self.curr)
 
         return self.tokens            
