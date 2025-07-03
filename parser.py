@@ -53,33 +53,35 @@ class Parser:
     # <number>  ::=  <digit>+
     # <digit>   ::=  '0' | '1' | '2' | ... | '9'
     def primary(self):
-        if self.match(TOK_INTEGER) : return Integer(int(self.prev_token().lexeme))
-        if self.match(TOK_FLOAT) : return Integer(float(self.prev_token().lexeme))
+        if self.match(TOK_INTEGER) : return Integer(int(self.prev_token().lexeme) , line=self.prev_token().line)
+        if self.match(TOK_FLOAT) : return Integer(float(self.prev_token().lexeme) , line=self.prev_token().line)
         if self.match(TOK_LPAREN):
             expr = self.expr()
             if not(self.match(TOK_RPAREN)) : WinkySyntaxError("unexpected errpr : needed a ')'" , self.prev_token().line)
-            else : return Grouping(expr)
+            else : return Grouping(expr , line=self.prev_token().line)
     
     # <unary> ::= ('+' | '-' | '~') <unary> | <primary>
     def unary(self):
         if self.match(TOK_PLUS) or self.match(TOK_MINUS) or self.match(TOK_NOT):
             op = self.prev_token()
             right = self.unary()
-            return UnOp(op , right)
+            return UnOp(op , right , line=self.prev_token().line)
         return self.primary()
     
     # <factor> ::= <unary>
+    # factor is about multiplication or division
     def factor(self):
         return self.unary()
 
     # <term>  ::=  <factor> (<mulop> <factor>)*
     # <mulop> ::=  '*' | '/'
+    # term is about addition or subtraction
     def term(self):
         factor = self.factor()
         while self.match(TOK_STAR) or self.match(TOK_SLASH):
             op = self.prev_token()
             right = self.factor()
-            factor = BinOp(op , factor , right)
+            factor = BinOp(op , factor , right , line=self.prev_token().line)
         return factor
     
     # <expr>  ::=  <term> (<addop> <term>)*
@@ -89,7 +91,7 @@ class Parser:
         while self.match(TOK_PLUS) or self.match(TOK_MINUS):
             op = self.prev_token()
             right = self.term()
-            term = BinOp(op , term , right)
+            term = BinOp(op , term , right , line=self.prev_token().line)
         return term
 
     def parse(self):
