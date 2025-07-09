@@ -1,3 +1,13 @@
 
 -- -3 + 42 * 2 + (47 * -21)
-10 * 10 + (50 / 3)
+-- 10 * 10 + (50 / 3)
+
+-- ~true
+
+-- "this is string that we have here"
+
+-- ~((47 * 2) >= 0) == false
+-- 20 + " cm" + " is the length of the " + 'anthena'
+
+-- 2 * "hi"
+"ih" * 3

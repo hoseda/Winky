@@ -49,12 +49,16 @@ class Parser:
             return self.tokens[self.curr +1]
         else : WinkySyntaxError(f"Found {self.prev_token().lexeme!r} at the end of parsing." , self.prev_token().line)
 
-    # <primary  > ::=  <number> | '('<expr>')'
+    # <primary  > ::=  <number> | <bool> | <string> | '('<expr>')'
     # <number>  ::=  <digit>+
     # <digit>   ::=  '0' | '1' | '2' | ... | '9'
+    # <bool>    ::=  'true' | 'false'
     def primary(self):
         if self.match(TOK_INTEGER) : return Integer(int(self.prev_token().lexeme) , line=self.prev_token().line)
         if self.match(TOK_FLOAT) : return Integer(float(self.prev_token().lexeme) , line=self.prev_token().line)
+        if self.match(TOK_TRUE) : return Bool(bool(self.prev_token().lexeme) , line=self.prev_token().line)
+        if self.match(TOK_FALSE) : return Bool(bool(self.prev_token().lexeme) , line=self.prev_token().line)
+        if self.match(TOK_STRING) : return String(str(self.prev_token().lexeme[1:-1]) , line=self.prev_token().line)
         if self.match(TOK_LPAREN):
             expr = self.expr()
             if not(self.match(TOK_RPAREN)) : WinkySyntaxError("unexpected errpr : needed a ')'" , self.prev_token().line)

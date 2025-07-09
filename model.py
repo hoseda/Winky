@@ -1,5 +1,6 @@
 # code object here.
 
+from typing import ValuesView
 from tokens import Token
 
 
@@ -42,6 +43,33 @@ class Float(Expr):
 
     def __repr__(self) -> str:
         return f"Float [{self.value}]"
+
+
+class Bool(Expr):
+    '''
+    Example : true , false
+    '''
+    def __init__(self , value , line):
+        assert isinstance(value , bool) , value
+        self.value = value
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"Bool[{self.value}]"
+
+
+class String(Expr):
+    '''
+    Example : 'string' , "string"
+    '''
+    def __init__(self , value , line) -> None:
+        assert isinstance(value , str) , value
+        self.value = value
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"String[{self.value}]"
+
 
 class UnOp(Expr):
     '''

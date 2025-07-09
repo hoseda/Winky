@@ -12,4 +12,7 @@ def WinkyLexerError(message , row , col) -> str:
     sys.exit(1)
 
 
-    
+def WinkyRuntimeError(message , line) -> str:
+    print(f"RUNTIME ERROR at Line[{line}] , MESSAGE : {message}")
+    sys.exit()
+
