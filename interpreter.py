@@ -1,7 +1,6 @@
 # code Winky interpreter here.
 
 
-from re import template
 from error import WinkyRuntimeError
 from model import *
 from tokens import *

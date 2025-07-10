@@ -60,31 +60,45 @@ class Parser:
         if self.match(TOK_FALSE) : return Bool(False , line=self.prev_token().line)
         if self.match(TOK_STRING) : return String(str(self.prev_token().lexeme[1:-1]) , line=self.prev_token().line)
         if self.match(TOK_LPAREN):
-            expr = self.expr()
+            expr = self.Start()
             if not(self.match(TOK_RPAREN)) : WinkySyntaxError("unexpected errpr : needed a ')'" , self.prev_token().line)
             else : return Grouping(expr , line=self.prev_token().line)
-    
-    # <unary> ::= ('+' | '-' | '~') <unary> | <primary>
+
+
+    def Expo(self):
+        primary = self.primary()
+        while self.match(TOK_CARET):
+            op = self.prev_token()
+            right = self.primary()
+            parenthes = BinOp(op , primary , right , line=self.prev_token().line)
+        return primary
+
+
+    # <unary> ::= ('+' | '-' | '~') <unary> | <Parenthes>
     def unary(self):
         if self.match(TOK_PLUS) or self.match(TOK_MINUS) or self.match(TOK_NOT):
             op = self.prev_token()
             right = self.unary()
             return UnOp(op , right , line=self.prev_token().line)
-        return self.primary()
-    
-    # <factor> ::= <unary>
-    # factor is about multiplication or division
-    def factor(self):
-        return self.unary()
+        return self.Expo()
 
-    # <term>  ::=  <factor> (<mulop> <factor>)*
-    # <mulop> ::=  '*' | '/' | '^' | '%'
+    # <Mod> ::= <Unary> ('%' <Unary>)*
+    def Mod(self):
+        unary = self.unary()
+        while self.match(TOK_MOD):
+            op = self.prev_token()
+            right = self.unary()
+            unary = BinOp(op , unary , right , line=self.prev_token().line)
+        return unary
+
+    # <term>  ::=  <Mod> (<mulop> <Mod>)*
+    # <mulop> ::=  '*' | '/' 
     # term is about addition or subtraction
     def term(self):
-        factor = self.factor()
-        while self.match(TOK_STAR) or self.match(TOK_SLASH) or self.match(TOK_CARET) or self.match(TOK_MOD):
+        factor = self.Mod()
+        while self.match(TOK_STAR) or self.match(TOK_SLASH):
             op = self.prev_token()
-            right = self.factor()
+            right = self.Mod()
             factor = BinOp(op , factor , right , line=self.prev_token().line)
         return factor
     
@@ -126,8 +140,8 @@ class Parser:
             equal = BinOp(op , equal , right , line=self.prev_token().line)
         return equal
 
-    # <OR> ::= <AND> ('or' <AND>)*  
-    def OR(self):
+    # <Start> ::= <AND> ('or' <AND>)*  
+    def Start(self):
         And = self.AND()
         while self.match(TOK_OR):
             op = self.prev_token()
@@ -136,5 +150,5 @@ class Parser:
         return And
 
     def parse(self):
-        ast = self.OR()
+        ast = self.Start()
         return ast
