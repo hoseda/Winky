@@ -1,6 +1,7 @@
 # code Winky interpreter here.
 
 
+from re import template
 from error import WinkyRuntimeError
 from model import *
 from tokens import *
@@ -81,9 +82,63 @@ class Interpreter:
                     return (TYPE_NUMBER , lhs ** rhs)
                 else:
                     WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
-            
 
+            elif op_token == TOK_GT:
+                if lh_type == TYPE_NUMBER and rh_type == TYPE_NUMBER:
+                    return (TYPE_BOOL , lhs > rhs)
+                else:
+                    WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
+
+            elif op_token == TOK_LT:
+                if lh_type == TYPE_NUMBER and rh_type == TYPE_NUMBER:
+                    return (TYPE_BOOL , lhs < rhs)
+                else:
+                    WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
+            
+            elif op_token == TOK_GE:
+                if lh_type == TYPE_NUMBER and rh_type == TYPE_NUMBER:
+                    return (TYPE_BOOL , lhs >= rhs)
+                else:
+                    WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
+            
+            elif op_token == TOK_LE:
+                if lh_type == TYPE_NUMBER and rh_type == TYPE_NUMBER:
+                    return (TYPE_BOOL , lhs <= rhs)
+                else:
+                    WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
+            
+            elif op_token == TOK_EQEQ:
+                if lh_type == TYPE_NUMBER and rh_type == TYPE_NUMBER:
+                    return (TYPE_BOOL , float(lhs) == float(rhs))
+                elif lh_type == TYPE_BOOL and rh_type == TYPE_BOOL:
+                    return (TYPE_BOOL , bool(lhs) == bool(rhs))
+                elif lh_type == TYPE_String and rh_type == TYPE_String:
+                    return (TYPE_BOOL , str(lhs) == str(rhs))
+                else:
+                    WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
+            
+            elif op_token == TOK_NE:
+                if lh_type == TYPE_NUMBER and rh_type == TYPE_NUMBER:
+                    return (TYPE_BOOL , float(lhs) != float(rhs))
+                elif lh_type == TYPE_BOOL and rh_type == TYPE_BOOL:
+                    return (TYPE_BOOL , bool(lhs) != bool(rhs))
+                elif lh_type == TYPE_String and rh_type == TYPE_String:
+                    return (TYPE_BOOL , str(lhs) != str(rhs))
+                else:
+                    WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
         
+            elif op_token == TOK_AND:
+                if lh_type == TYPE_BOOL and rh_type == TYPE_BOOL:
+                    return (TYPE_BOOL , bool(lhs) and bool(rhs))
+                else:
+                    WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
+
+            elif op_token == TOK_OR:
+                if lh_type == TYPE_BOOL and rh_type == TYPE_BOOL:
+                    return (TYPE_BOOL , bool(lhs) or bool(rhs))
+                else:
+                    WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
+
         elif isinstance(node , UnOp):
             operand_token = node.op.token_type
             expr_type , expr = self.interpret(node.value)

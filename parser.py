@@ -1,4 +1,4 @@
-# code parser here
+# code parser herew
 
 from error import *
 from error import WinkySyntaxError
@@ -49,15 +49,15 @@ class Parser:
             return self.tokens[self.curr +1]
         else : WinkySyntaxError(f"Found {self.prev_token().lexeme!r} at the end of parsing." , self.prev_token().line)
 
-    # <primary  > ::=  <number> | <bool> | <string> | '('<expr>')'
+    # <primary> ::=  <number> | <bool> | <string> | '('<expr>')'
     # <number>  ::=  <digit>+
     # <digit>   ::=  '0' | '1' | '2' | ... | '9'
     # <bool>    ::=  'true' | 'false'
     def primary(self):
         if self.match(TOK_INTEGER) : return Integer(int(self.prev_token().lexeme) , line=self.prev_token().line)
         if self.match(TOK_FLOAT) : return Integer(float(self.prev_token().lexeme) , line=self.prev_token().line)
-        if self.match(TOK_TRUE) : return Bool(bool(self.prev_token().lexeme) , line=self.prev_token().line)
-        if self.match(TOK_FALSE) : return Bool(bool(self.prev_token().lexeme) , line=self.prev_token().line)
+        if self.match(TOK_TRUE) : return Bool(True , line=self.prev_token().line)
+        if self.match(TOK_FALSE) : return Bool(False , line=self.prev_token().line)
         if self.match(TOK_STRING) : return String(str(self.prev_token().lexeme[1:-1]) , line=self.prev_token().line)
         if self.match(TOK_LPAREN):
             expr = self.expr()
@@ -78,11 +78,11 @@ class Parser:
         return self.unary()
 
     # <term>  ::=  <factor> (<mulop> <factor>)*
-    # <mulop> ::=  '*' | '/'
+    # <mulop> ::=  '*' | '/' | '^' | '%'
     # term is about addition or subtraction
     def term(self):
         factor = self.factor()
-        while self.match(TOK_STAR) or self.match(TOK_SLASH):
+        while self.match(TOK_STAR) or self.match(TOK_SLASH) or self.match(TOK_CARET) or self.match(TOK_MOD):
             op = self.prev_token()
             right = self.factor()
             factor = BinOp(op , factor , right , line=self.prev_token().line)
@@ -97,7 +97,44 @@ class Parser:
             right = self.term()
             term = BinOp(op , term , right , line=self.prev_token().line)
         return term
+    
+
+    # <COMPA> ::= <expr> (('<' | '>' | '<=' | '>=') <expr>)*
+    def COMPA(self):
+        expr = self.expr()
+        while self.match(TOK_GT) or self.match(TOK_LT) or self.match(TOK_GE) or self.match(TOK_LE):
+            op = self.prev_token()
+            right = self.expr()
+            expr = BinOp(op , expr , right , line=self.prev_token().line)
+        return expr
+
+    # <EQUAL> ::= <COMPA> (('==' | '~=') <COMPA>)*
+    def EQUAL(self):
+        compa = self.COMPA()
+        while self.match(TOK_EQEQ) or self.match(TOK_NE):
+            op = self.prev_token()
+            righ = self.COMPA()
+            compa = BinOp(op , compa , righ , line=self.prev_token().line)
+        return compa
+
+    # <AND> ::= <EQUAL> ('and' <EQUAL>)*
+    def AND(self):
+        equal = self.EQUAL()
+        while self.match(TOK_AND):
+            op = self.prev_token()
+            right = self.EQUAL()
+            equal = BinOp(op , equal , right , line=self.prev_token().line)
+        return equal
+
+    # <OR> ::= <AND> ('or' <AND>)*  
+    def OR(self):
+        And = self.AND()
+        while self.match(TOK_OR):
+            op = self.prev_token()
+            right = self.AND()
+            And = BinOp(op , And , right , line=self.prev_token().line)
+        return And
 
     def parse(self):
-        ast = self.expr()
+        ast = self.OR()
         return ast

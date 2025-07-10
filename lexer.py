@@ -76,28 +76,34 @@ class Lexer:
             elif ch == '(' : self.add_token(TOK_LPAREN) 
             elif ch == ')' : self.add_token(TOK_RPAREN)
             elif ch == '{' : self.add_token(TOK_LCURLY)
-            elif ch == '}' : self.add_token(TOK_RCURLY)
+            elif ch == '}w' : self.add_token(TOK_RCURLY)
             #######################################################
             #   Two Character lexemes                             #
             #######################################################
+
+            ## is equal ?
             elif ch == '=' :
                 if self.match('=') : self.add_token(TOK_EQEQ)
                 else : self.add_token(TOK_EQ)
-                
+            
+            ## is not equal ?
             elif ch == '~' :
                 if self.match('=') : self.add_token(TOK_NE)
                 else : self.add_token(TOK_NOT)
-
+            
+            ## is grater than or equal ?
             elif ch == '>' :
                 if self.match('=') : self.add_token(TOK_GE)
                 elif self.match('>') : self.add_token(TOK_GTGT)
                 else: self.add_token(TOK_GT)
-
+            
+            ## is less than or equal ?
             elif ch == '<' :
                 if self.match('=') : self.add_token(TOK_LE)
                 elif self.match('<') : self.add_token(TOK_LTLT)
                 else: self.add_token(TOK_LT)
             
+            ## assignment
             elif ch == ':' :
                 if self.match('=') : self.add_token(TOK_ASSIGN)
                 else : self.add_token(TOK_COLON)
