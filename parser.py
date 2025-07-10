@@ -70,7 +70,7 @@ class Parser:
         while self.match(TOK_CARET):
             op = self.prev_token()
             right = self.primary()
-            parenthes = BinOp(op , primary , right , line=self.prev_token().line)
+            primary = BinOp(op , primary , right , line=self.prev_token().line)
         return primary
 
 
