@@ -55,7 +55,7 @@ class Parser:
     # <bool>    ::=  'true' | 'false'
     def primary(self):
         if self.match(TOK_INTEGER) : return Integer(int(self.prev_token().lexeme) , line=self.prev_token().line)
-        if self.match(TOK_FLOAT) : return Integer(float(self.prev_token().lexeme) , line=self.prev_token().line)
+        if self.match(TOK_FLOAT) : return Float(float(self.prev_token().lexeme) , line=self.prev_token().line)
         if self.match(TOK_TRUE) : return Bool(True , line=self.prev_token().line)
         if self.match(TOK_FALSE) : return Bool(False , line=self.prev_token().line)
         if self.match(TOK_STRING) : return String(str(self.prev_token().lexeme[1:-1]) , line=self.prev_token().line)

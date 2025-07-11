@@ -37,7 +37,6 @@ class Lexer:
 
 
     def tokenize(self):
-        print("inside tokenization loop")
         while self.curr < len(self.source):
             self.start = self.curr
             ch = self.advance()

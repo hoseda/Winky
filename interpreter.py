@@ -25,7 +25,7 @@ class Interpreter:
             return (TYPE_NUMBER,float(node.value))
 
         elif isinstance(node , Bool):
-            return (TYPE_BOOL,bool(node.value))
+            return (TYPE_BOOL,node.value)
 
         elif isinstance(node , String):
             return (TYPE_String,str(node.value))
@@ -96,7 +96,7 @@ class Interpreter:
             
             elif op_token == TOK_GE:
                 if lh_type == TYPE_NUMBER and rh_type == TYPE_NUMBER:
-                    return (TYPE_BOOL , lhs >= rhs)
+                    return (TYPE_BOOL , bool(lhs >= rhs))
                 else:
                     WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
             
@@ -110,7 +110,7 @@ class Interpreter:
                 if lh_type == TYPE_NUMBER and rh_type == TYPE_NUMBER:
                     return (TYPE_BOOL , float(lhs) == float(rhs))
                 elif lh_type == TYPE_BOOL and rh_type == TYPE_BOOL:
-                    return (TYPE_BOOL , bool(lhs) == bool(rhs))
+                    return (TYPE_BOOL , lhs == rhs)
                 elif lh_type == TYPE_String and rh_type == TYPE_String:
                     return (TYPE_BOOL , str(lhs) == str(rhs))
                 else:
@@ -120,7 +120,7 @@ class Interpreter:
                 if lh_type == TYPE_NUMBER and rh_type == TYPE_NUMBER:
                     return (TYPE_BOOL , float(lhs) != float(rhs))
                 elif lh_type == TYPE_BOOL and rh_type == TYPE_BOOL:
-                    return (TYPE_BOOL , bool(lhs) != bool(rhs))
+                    return (TYPE_BOOL , lhs != rhs)
                 elif lh_type == TYPE_String and rh_type == TYPE_String:
                     return (TYPE_BOOL , str(lhs) != str(rhs))
                 else:
@@ -157,7 +157,7 @@ class Interpreter:
 
             elif operand_token == TOK_NOT:
                 if expr_type == TYPE_BOOL:
-                    return (TYPE_BOOL , ~expr)
+                    return (TYPE_BOOL , not expr)
                 else:
                     WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} with {expr_type}" , node.op.line)
 
