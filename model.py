@@ -104,6 +104,19 @@ class BinOp(Expr):
         return f"Binary Operator (Operator: [{self.op.lexeme}] , LHS: [{self.left}] , RHS: [{self.right}])"
 
 
+class LogicalOp(Expr):
+    def __init__(self , op : Token , left : Expr , right : Expr , line):
+        assert isinstance(op , Token) , op
+        assert isinstance(left , Expr) , left
+        assert isinstance(right , Expr) , right
+        self.op = op
+        self.left = left
+        self.right = right
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"Logical Operator (Operator: [{self.op.lexeme}] , LHS: [{self.left}] , RHS: [{self.right}])"
+
 class Grouping(Expr):
     '''
     Example : ( <expr> )

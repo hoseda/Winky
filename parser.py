@@ -64,12 +64,13 @@ class Parser:
             if not(self.match(TOK_RPAREN)) : WinkySyntaxError("unexpected errpr : needed a ')'" , self.prev_token().line)
             else : return Grouping(expr , line=self.prev_token().line)
 
-
+    # <Expo> ::= <primary> ('^' <primary>)*
     def Expo(self):
         primary = self.primary()
         while self.match(TOK_CARET):
             op = self.prev_token()
-            right = self.primary()
+            # we want that the exponent operator be right associative so we call the rhs recursivly
+            right = self.Expo()
             primary = BinOp(op , primary , right , line=self.prev_token().line)
         return primary
 
@@ -137,7 +138,7 @@ class Parser:
         while self.match(TOK_AND):
             op = self.prev_token()
             right = self.EQUAL()
-            equal = BinOp(op , equal , right , line=self.prev_token().line)
+            equal = LogicalOp(op , equal , right , line=self.prev_token().line)
         return equal
 
     # <Start> ::= <AND> ('or' <AND>)*  
@@ -146,7 +147,7 @@ class Parser:
         while self.match(TOK_OR):
             op = self.prev_token()
             right = self.AND()
-            And = BinOp(op , And , right , line=self.prev_token().line)
+            And = LogicalOp(op , And , right , line=self.prev_token().line)
         return And
 
     def parse(self):

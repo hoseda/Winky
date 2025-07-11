@@ -126,17 +126,18 @@ class Interpreter:
                 else:
                     WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
         
-            elif op_token == TOK_AND:
-                if lh_type == TYPE_BOOL and rh_type == TYPE_BOOL:
-                    return (TYPE_BOOL , bool(lhs) and bool(rhs))
-                else:
-                    WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
+        
+        elif isinstance(node , LogicalOp):
+            op_token = node.op.token_type
+            lh_type , lhs = self.interpret(node.left)
 
-            elif op_token == TOK_OR:
-                if lh_type == TYPE_BOOL and rh_type == TYPE_BOOL:
-                    return (TYPE_BOOL , bool(lhs) or bool(rhs))
-                else:
-                    WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
+            if op_token == TOK_OR:
+                if lhs:
+                    return (TYPE_BOOL , lhs)
+            elif op_token == TOK_AND:
+                if not lhs:
+                    return (TYPE_BOOL , lhs)
+            return self.interpret(node.right)
 
         elif isinstance(node , UnOp):
             operand_token = node.op.token_type
