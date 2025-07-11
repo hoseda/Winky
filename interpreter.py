@@ -65,12 +65,16 @@ class Interpreter:
 
             elif op_token == TOK_SLASH:
                 if lh_type == TYPE_NUMBER and rh_type == TYPE_NUMBER:
+                    if rhs == 0:
+                        WinkyRuntimeError("Division by zero" , node.op.line)
                     return (TYPE_NUMBER , lhs / rhs)
                 else:
                     WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
 
             elif op_token == TOK_MOD:
                 if lh_type == TYPE_NUMBER and rh_type == TYPE_NUMBER:
+                    if rhs == 0:
+                        WinkyRuntimeError("Division by zero" , node.op.line)
                     return (TYPE_NUMBER , lhs % rhs)
                 else:
                     WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
