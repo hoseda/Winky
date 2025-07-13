@@ -52,21 +52,25 @@ class Parser:
             return self.tokens[self.curr +1]
         else : WinkySyntaxError(f"Found {self.prev_token().lexeme!r} at the end of parsing." , self.prev_token().line)
 
-    # <primary> ::=  <number> | <bool> | <string> | '('<expr>')'
+    # <primary> ::=  <number> | <bool> | <string> | <identifier> | '('<expr>')'
     # <number>  ::=  <digit>+
     # <digit>   ::=  '0' | '1' | '2' | ... | '9'
     # <bool>    ::=  'true' | 'false'
     def primary(self):
         if self.match(TOK_INTEGER) : return Integer(int(self.prev_token().lexeme) , line=self.prev_token().line)
-        if self.match(TOK_FLOAT) : return Float(float(self.prev_token().lexeme) , line=self.prev_token().line)
-        if self.match(TOK_TRUE) : return Bool(True , line=self.prev_token().line)
-        if self.match(TOK_FALSE) : return Bool(False , line=self.prev_token().line)
-        if self.match(TOK_STRING) : return String(str(self.prev_token().lexeme[1:-1]) , line=self.prev_token().line)
-        if self.match(TOK_LPAREN):
+        elif self.match(TOK_FLOAT) : return Float(float(self.prev_token().lexeme) , line=self.prev_token().line)
+        elif self.match(TOK_TRUE) : return Bool(True , line=self.prev_token().line)
+        elif self.match(TOK_FALSE) : return Bool(False , line=self.prev_token().line)
+        elif self.match(TOK_STRING) : return String(str(self.prev_token().lexeme[1:-1]) , line=self.prev_token().line)
+        elif self.match(TOK_LPAREN):
             expr = self.OR()
-            #TODO: HERE IS AN ERROR ABOUT HAVING AN UNEXPECTED ')' OR NEEDED A ')' and honestly i dont know why this is happening.
             if (not self.match(TOK_RPAREN)) : WinkySyntaxError("unexpected error : needed a ')'" , self.prev_token().line)
             else : return Grouping(expr , line=self.prev_token().line)
+        else:
+            #TODO: handle identifier and function calls here
+            # identifier
+            identifier = self.expect(TOK_IDENTIFIER)
+            return Identifier(identifier.lexeme , line=self.prev_token().line)
 
     # <Expo> ::= <primary> ('^' <primary>)*
     def Expo(self):
@@ -180,9 +184,18 @@ class Parser:
         self.expect(TOK_END)
         return IfStmt(test_expr , then_stmt , else_stmt , line=self.prev_token().line)
 
+    def assignment(self):
+        pass
+
+    def while_stmt(self):
+        pass
+
+    def for_stmt(self):
+        pass
+
 
     def stmt(self):
-        #TODO: parse for , while , if , else , print , end , etc , here.
+        #TODO: parse for assignment , while , if , else , print , end , etc , here.
         if self.peek().token_type == TOK_PRINT:
             return self.print_stmt()
         elif self.peek().token_type == TOK_PRINTLN:
@@ -190,7 +203,14 @@ class Parser:
         elif self.peek().token_type == TOK_IF:
             return self.if_stmt()
         else:
-            pass
+            #TODO: handle identifier and function call here.
+            left = self.OR()
+            if self.match(TOK_ASSIGN):
+                right = self.OR()
+                return Assignment(left , right , line=self.prev_token().line)
+            else:
+                #TODO: handle functoin call here.
+                pass
 
     def stmts(self):
         stmts = []

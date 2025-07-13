@@ -186,4 +186,7 @@ class Interpreter:
             else:
                 if node.else_stmt != None:
                     self.interpret(node.else_stmt)
+        
 
+        elif isinstance(node , Assignment):
+            pass

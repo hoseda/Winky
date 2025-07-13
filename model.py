@@ -1,7 +1,6 @@
 # code object here.
 
-from sys import exec_prefix
-from typing import ValuesView
+
 from tokens import Token
 
 
@@ -130,6 +129,19 @@ class Grouping(Expr):
     def __repr__(self) -> str:
         return f"Grouping({self.value})"
 
+
+class Identifier(Expr):
+    '''
+    Example: x , PI , _score , some_value , _forNow
+    '''
+    def __init__(self , lexeme , line):
+        assert isinstance(lexeme , str) , lexeme
+        self.lexeme = lexeme
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"Identifier({self.lexeme})"
+
 class Stmts(Node):
     '''
     contain the list of statements
@@ -141,6 +153,21 @@ class Stmts(Node):
 
     def __repr__(self) -> str:
         return f"Statements({self.stmts})"
+
+
+class Assignment(Stmt):
+    '''
+    Example: x := 12 , y := x + 1
+    '''
+    def __init__(self , left , right , line):
+        assert isinstance(left , Expr), left
+        assert isinstance(right , Expr), right
+        self.left =left
+        self.right =right
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"Assigmnet({self.left} , {self.right})"
 
 class PrintStmt(Stmt):
     '''
@@ -170,8 +197,6 @@ class PrintLnStmt(Stmt):
 class WhileStmt(Stmt):
     pass
 
-class Assignment(Stmt):
-    pass
 
 class IfStmt(Stmt):
     '''
@@ -191,3 +216,4 @@ class IfStmt(Stmt):
 
 class ForStmt(Stmt):
     pass
+
