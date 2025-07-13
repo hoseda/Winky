@@ -1,6 +1,7 @@
 # code Winky interpreter here.
 
 
+from sys import setdlopenflags
 from error import WinkyRuntimeError
 from model import *
 from tokens import *
@@ -164,4 +165,26 @@ class Interpreter:
                     return (TYPE_BOOL , not expr)
                 else:
                     WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} with {expr_type}" , node.op.line)
+        
+
+        elif isinstance(node , Stmts):
+            for stmt in node.stmts:
+                self.interpret(stmt)
+
+
+        elif isinstance(node , PrintStmt):
+            expr_type , expr_val = self.interpret(node.value)
+            print(expr_val , end="")
+
+        elif isinstance(node , PrintLnStmt):
+            expr_type , expr_val = self.interpret(node.value)
+            print(expr_val)
+
+        elif isinstance(node , IfStmt):
+            test_type , test_val = self.interpret(node.test_expr)
+            if test_val:
+                self.interpret(node.then_stmt)
+            else:
+                if node.else_stmt != None:
+                    self.interpret(node.else_stmt)
 

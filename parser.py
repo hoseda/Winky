@@ -1,5 +1,6 @@
-# code parser herew
+# code parser here
 
+from sys import warnoptions
 from error import *
 from error import WinkySyntaxError
 from model import *
@@ -33,11 +34,13 @@ class Parser:
             return token
         else: WinkySyntaxError(f"Expected {expected_type!r} but found {self.peek().lexeme!r}." , self.prev_token().line)
     
-    def match(self,expected): 
-        if self.curr < len(self.tokens) and self.peek().token_type == expected:
-            self.curr += 1
-            return True
-        else: return False
+    def match(self,expected):
+        if self.curr >= len(self.tokens):
+            return False
+        if self.peek().token_type != expected:
+            return False
+        self.curr += 1
+        return True
     
 
     def prev_token(self) -> Token:
@@ -60,8 +63,9 @@ class Parser:
         if self.match(TOK_FALSE) : return Bool(False , line=self.prev_token().line)
         if self.match(TOK_STRING) : return String(str(self.prev_token().lexeme[1:-1]) , line=self.prev_token().line)
         if self.match(TOK_LPAREN):
-            expr = self.Start()
-            if not(self.match(TOK_RPAREN)) : WinkySyntaxError("unexpected errpr : needed a ')'" , self.prev_token().line)
+            expr = self.stmt()
+            #TODO: HERE IS AN ERROR ABOUT HAVING AN UNEXPECTED ')' OR NEEDED A ')' and honestly i dont know why this is happening.
+            if (not self.match(TOK_RPAREN)) : WinkySyntaxError("unexpected error : needed a ')'" , self.prev_token().line)
             else : return Grouping(expr , line=self.prev_token().line)
 
     # <Expo> ::= <primary> ('^' <primary>)*
@@ -141,15 +145,64 @@ class Parser:
             equal = LogicalOp(op , equal , right , line=self.prev_token().line)
         return equal
 
-    # <Start> ::= <AND> ('or' <AND>)*  
-    def Start(self):
+    # <OR> ::= <AND> ('or' <AND>)*  
+    def OR(self):
         And = self.AND()
         while self.match(TOK_OR):
             op = self.prev_token()
             right = self.AND()
             And = LogicalOp(op , And , right , line=self.prev_token().line)
         return And
+    
+    def print_stmt(self):
+        if self.match(TOK_PRINT):
+            val = self.OR()
+            return PrintStmt(val , line=self.prev_token().line)
+
+    def printLn_stmt(self):
+        if self.match(TOK_PRINTLN):
+            val = self.OR()
+            return PrintLnStmt(val , line=self.prev_token().line)
+      
+      
+    # <ifStmt> ::= "if" <test_expr> "then" <then_stmt> ("else" <else_stmt>)? "end"
+    def if_stmt(self):
+        self.expect(TOK_IF)
+        test_expr = self.OR()
+        self.expect(TOK_THEN)
+        then_stmt = self.stmts()
+        if self.peek().token_type == TOK_ELSE:
+            self.advance()
+            else_stmt = self.stmts()
+        else:
+            else_stmt = None
+
+        self.expect(TOK_END)
+        return IfStmt(test_expr , then_stmt , else_stmt , line=self.prev_token().line)
+
+
+    def stmt(self):
+        #TODO: parse for , while , if , else , print , end , etc , here.
+        if self.peek().token_type == TOK_PRINT:
+            return self.print_stmt()
+        elif self.peek().token_type == TOK_PRINTLN:
+            return self.printLn_stmt()
+        elif self.peek().token_type == TOK_IF:
+            return self.if_stmt()
+        else:
+            pass
+
+    def stmts(self):
+        stmts = []
+        while self.curr < len(self.tokens) and not self.peek().token_type == TOK_ELSE and not self.peek().token_type == TOK_END:
+            stmt = self.stmt()
+            stmts.append(stmt)
+        return Stmts(stmts , line=self.prev_token().line)
+
+    def program(self):
+        stmts = self.stmts()
+        return stmts
 
     def parse(self):
-        ast = self.Start()
-        return ast
+        program = self.program()
+        return program

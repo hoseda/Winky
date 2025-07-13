@@ -1,33 +1,9 @@
 
--- -3 + 42 * 2 + (47 * -21)
--- 10 * 10 + (50 / 3)
+println 3 + 3
+println 2^5
+println "hello world!"
 
--- ~true
-
--- "this is string that we have here"
-
--- ~((47 * 2) >= 0) == false
--- 20 + " cm" + " is the length of the " + 'anthena'
-
--- 2 * "hi"
--- "ih" * 3
-
--- 2 ^ 3
---20 % 3
-
--- 9 ^ (3/2)
-
--- ((5 - 2 ^ 3) >= 2) and (10 /2 > 3)
--- (((((( 3+4 ) +1)*3)-5) >= (((5*2)-8)+2)/3)) or false
-
---false or false
-
--- true and 10 <0
-
--- 3+4 + 1 *3 -5 >= 5*2 ^ (-8 +2) /3
-
--- true ~= true
-
--- 2 ^ 3 ^ 2
-
-
+if false or 53 % 3 == 2 then
+	println "this is inside if"
+else println "this is inside else"
+end

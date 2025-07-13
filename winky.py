@@ -45,8 +45,7 @@ if __name__ == "__main__":
             print("##################################################################################") 
             print("INTERPRETER:")
             intp = INTP()
-            result = intp.interpret(ast)
-            print(f"Final Result : {result}")
+            intp.interpret(ast)
 
     else:
         raise SystemExit("Usage : python3 winky.py <filename>")

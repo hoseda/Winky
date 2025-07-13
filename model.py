@@ -1,5 +1,6 @@
 # code object here.
 
+from sys import exec_prefix
 from typing import ValuesView
 from tokens import Token
 
@@ -129,6 +130,42 @@ class Grouping(Expr):
     def __repr__(self) -> str:
         return f"Grouping({self.value})"
 
+class Stmts(Node):
+    '''
+    contain the list of statements
+    '''
+    def __init__(self , stmts , line):
+        assert all(isinstance(stmt , Stmt) for stmt in stmts)
+        self.stmts = stmts
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"Statements({self.stmts})"
+
+class PrintStmt(Stmt):
+    '''
+    print statement model
+    '''
+    def __init__(self , val , line):
+        assert isinstance(val , Expr) , val
+        self.value = val
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"PrintStmt({self.value})"
+
+
+class PrintLnStmt(Stmt):
+    '''
+    print line statement model
+    '''
+    def __init__(self , val , line):
+        assert isinstance(val , Expr) , val
+        self.value = val
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"PrintLnStmt({self.value})"
 
 class WhileStmt(Stmt):
     pass
@@ -137,7 +174,20 @@ class Assignment(Stmt):
     pass
 
 class IfStmt(Stmt):
-    pass
+    '''
+    <ifStmt> ::= "if" <test_expr> "then" <then_stmt> ("else" <else_stmt>)? "end"
+    '''
+    def __init__(self , test_expr , then_stmt , else_stmt , line):
+        assert isinstance(test_expr , Expr) , test_expr
+        assert isinstance(then_stmt , Stmts) , then_stmt
+        assert else_stmt is None or isinstance(else_stmt , Stmts) , else_stmt
+        self.test_expr = test_expr
+        self.then_stmt = then_stmt
+        self.else_stmt = else_stmt
+        self.line = line
+
+    def __repr__(self):
+        return f"IfStmt(test:[{self.test_expr}] , then:[{self.then_stmt}] , else:[{self.else_stmt}])"
 
 class ForStmt(Stmt):
     pass
