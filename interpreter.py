@@ -1,7 +1,6 @@
 # code Winky interpreter here.
 
 
-from sys import setdlopenflags
 from error import WinkyRuntimeError
 from model import *
 from tokens import *

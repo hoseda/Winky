@@ -3,7 +3,17 @@ println 3 + 3
 println 2^5
 println "hello world!"
 
-if false or 53 % 3 == 2 then
-	println "this is inside if"
-else println "this is inside else"
+if false or (53 % 3 == 2 and ~("ali" == "Ali")) then
+	println "this is inside if 1"
+	println "this is inside if 2"
+	println "this is inside if 3"
+else 
+	println "this is inside else"
+end
+
+
+if (true) then
+	println ("this is inside if")
+else
+	println("this is inside else")
 end

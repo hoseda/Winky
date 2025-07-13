@@ -1,6 +1,7 @@
 # code parser here
 
-from sys import warnoptions
+
+
 from error import *
 from error import WinkySyntaxError
 from model import *
@@ -44,11 +45,10 @@ class Parser:
     
 
     def prev_token(self) -> Token:
-        return self.tokens[self.curr -1]    
+        return self.tokens[self.curr -1]
 
-
-    def next_token(self) -> Token:
-        if (self.curr +1) <= len(self.tokens):
+    def next_token(self):
+        if (self.curr +1) < len(self.tokens):
             return self.tokens[self.curr +1]
         else : WinkySyntaxError(f"Found {self.prev_token().lexeme!r} at the end of parsing." , self.prev_token().line)
 
@@ -63,7 +63,7 @@ class Parser:
         if self.match(TOK_FALSE) : return Bool(False , line=self.prev_token().line)
         if self.match(TOK_STRING) : return String(str(self.prev_token().lexeme[1:-1]) , line=self.prev_token().line)
         if self.match(TOK_LPAREN):
-            expr = self.stmt()
+            expr = self.OR()
             #TODO: HERE IS AN ERROR ABOUT HAVING AN UNEXPECTED ')' OR NEEDED A ')' and honestly i dont know why this is happening.
             if (not self.match(TOK_RPAREN)) : WinkySyntaxError("unexpected error : needed a ')'" , self.prev_token().line)
             else : return Grouping(expr , line=self.prev_token().line)

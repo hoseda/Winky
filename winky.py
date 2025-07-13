@@ -16,7 +16,6 @@ if __name__ == "__main__":
             tks = Lexer(inp).tokenize()
             ast = Parser(tks).parse()
             intp = INTP().interpret(ast)
-            print(intp[1])
 
 
     elif len(sys.argv) == 2:
