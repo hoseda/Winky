@@ -3,6 +3,7 @@
 
 from error import WinkyRuntimeError
 from model import *
+from state import *
 from tokens import *
 
 ###################################################################################
@@ -17,7 +18,7 @@ TYPE_String = "TYPE_STRING" # '' | ""
 
 class Interpreter:
 
-    def interpret(self , node):
+    def interpret(self , node , env):
         if isinstance(node , Integer):
             return (TYPE_NUMBER,float(node.value))
 
@@ -31,12 +32,12 @@ class Interpreter:
             return (TYPE_String,str(node.value))
 
         elif isinstance(node , Grouping):
-            return self.interpret(node.value)
+            return self.interpret(node.value , env)
 
         elif isinstance(node , BinOp):
             op_token = node.op.token_type
-            lh_type , lhs = self.interpret(node.left)
-            rh_type , rhs = self.interpret(node.right)
+            lh_type , lhs = self.interpret(node.left , env)
+            rh_type , rhs = self.interpret(node.right, env)
 
             if op_token == TOK_PLUS:
                 if lh_type == TYPE_NUMBER and rh_type == TYPE_NUMBER:
@@ -133,7 +134,7 @@ class Interpreter:
         
         elif isinstance(node , LogicalOp):
             op_token = node.op.token_type
-            lh_type , lhs = self.interpret(node.left)
+            lh_type , lhs = self.interpret(node.left , env)
 
             if op_token == TOK_OR:
                 if lhs:
@@ -141,11 +142,11 @@ class Interpreter:
             elif op_token == TOK_AND:
                 if not lhs:
                     return (TYPE_BOOL , lhs)
-            return self.interpret(node.right)
+            return self.interpret(node.right , env)
 
         elif isinstance(node , UnOp):
             operand_token = node.op.token_type
-            expr_type , expr = self.interpret(node.value)
+            expr_type , expr = self.interpret(node.value , env)
 
             if operand_token == TOK_PLUS:
                 if expr_type == TYPE_NUMBER:
@@ -168,25 +169,43 @@ class Interpreter:
 
         elif isinstance(node , Stmts):
             for stmt in node.stmts:
-                self.interpret(stmt)
+                self.interpret(stmt , env)
 
 
         elif isinstance(node , PrintStmt):
-            expr_type , expr_val = self.interpret(node.value)
+            expr_type , expr_val = self.interpret(node.value , env)
             print(expr_val , end="")
 
         elif isinstance(node , PrintLnStmt):
-            expr_type , expr_val = self.interpret(node.value)
+            expr_type , expr_val = self.interpret(node.value , env)
             print(expr_val)
 
         elif isinstance(node , IfStmt):
-            test_type , test_val = self.interpret(node.test_expr)
+            test_type , test_val = self.interpret(node.test_expr , env)
             if test_val:
-                self.interpret(node.then_stmt)
+                self.interpret(node.then_stmt , env.new_env()) # inside of the if is a local enviroment
             else:
                 if node.else_stmt != None:
-                    self.interpret(node.else_stmt)
+                    self.interpret(node.else_stmt , env.new_env())  # inside of the else is a local enviroment
         
+        
+        elif isinstance(node , Identifier):
+            value = env.get_val(node.lexeme)
+            if value is None:
+                WinkyRuntimeError(f"Undeclared variable {node.lexeme!r}" , node.line)
+            if value[1] is None:
+                WinkyRuntimeError(f"Uninitialized variable {node.lexeme}" , node.line)
+            return value
+
 
         elif isinstance(node , Assignment):
-            pass
+            right_type , right_val = self.interpret(node.right , env)
+            env.set_val(node.left.lexeme , (right_type , right_val))
+
+
+    def interpret_ast(self , node):
+        '''
+        starting function
+        '''
+        env = Enviroment()
+        self.interpret(node , env)

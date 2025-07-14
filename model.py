@@ -160,7 +160,7 @@ class Assignment(Stmt):
     Example: x := 12 , y := x + 1
     '''
     def __init__(self , left , right , line):
-        assert isinstance(left , Expr), left
+        assert isinstance(left , Identifier), left
         assert isinstance(right , Expr), right
         self.left =left
         self.right =right

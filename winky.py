@@ -15,7 +15,7 @@ if __name__ == "__main__":
                 exit()
             tks = Lexer(inp).tokenize()
             ast = Parser(tks).parse()
-            intp = INTP().interpret(ast)
+            intp = INTP().interpret_ast(ast)
 
 
     elif len(sys.argv) == 2:
@@ -44,7 +44,7 @@ if __name__ == "__main__":
             print("##################################################################################") 
             print("INTERPRETER:")
             intp = INTP()
-            intp.interpret(ast)
+            intp.interpret_ast(ast)
 
     else:
         raise SystemExit("Usage : python3 winky.py <filename>")

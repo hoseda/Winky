@@ -1,3 +1,25 @@
 
 x := 12
-y := x * 3
+z := 0
+println ("x is " + x)
+
+
+if true then
+	y := 2
+	if true then
+		println x + y
+		z := x + y
+	end
+end
+
+
+
+if x == 12  then
+	y := x * 2
+	println "y is local varible " + y
+else
+	z := y
+	println "z is equal to " + z
+end
+
+println z
