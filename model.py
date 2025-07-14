@@ -1,6 +1,6 @@
 # code object here.
 
-
+from sys import is_finalizing
 from tokens import Token
 
 
@@ -195,7 +195,20 @@ class PrintLnStmt(Stmt):
         return f"PrintLnStmt({self.value})"
 
 class WhileStmt(Stmt):
-    pass
+    '''
+    while <test_expr> do
+        <stmts>
+    end
+    '''
+    def __init__(self , test_expr , while_stmts , line):
+        assert isinstance(test_expr , Expr), test_expr
+        assert isinstance(while_stmts , Stmts), while_stmts
+        self.test_expr = test_expr
+        self.while_stmts = while_stmts
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"WhileStmt(test: [{self.test_expr}] , Stmts: [{self.while_stmts}])"
 
 
 class IfStmt(Stmt):
@@ -215,5 +228,25 @@ class IfStmt(Stmt):
         return f"IfStmt(test:[{self.test_expr}] , then:[{self.then_stmt}] , else:[{self.else_stmt}])"
 
 class ForStmt(Stmt):
-    pass
+    '''
+    for <assignment> , <end> , (<stepper>)? do
+        <stmts>
+    end
+    '''
+    def __init__(self , identifier , start_expr , end_expr , stepper_expr , for_stmts , line):
+        assert isinstance(identifier , Identifier) , identifier
+        assert isinstance(start_expr , Expr) , start_expr
+        assert isinstance(end_expr , Expr) , end_expr
+        assert stepper_expr is None or isinstance(stepper_expr , Expr) , stepper_expr
+        assert isinstance(for_stmts , Stmts) , for_stmts
+        self.identifier = identifier
+        self.start_expr = start_expr
+        self.end_expr = end_expr
+        self.stepper_expr = stepper_expr 
+        self.for_stmts = for_stmts
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"ForStmt(StartAssignment: [{self.identifier}], StartExpr: [{self.start_expr}] , EndExpr: [{self.end_expr}] , StepperExpr: [{self.stepper_expr}] , Stmts: [{self.for_stmts}])"
+
 

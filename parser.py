@@ -2,6 +2,7 @@
 
 
 
+import re
 from error import *
 from error import WinkySyntaxError
 from model import *
@@ -184,14 +185,33 @@ class Parser:
         self.expect(TOK_END)
         return IfStmt(test_expr , then_stmt , else_stmt , line=self.prev_token().line)
 
-    def assignment(self):
-        pass
-
+    # <whileStmt> ::= "while" <text_expr> "do" <while_stmts> "end"
     def while_stmt(self):
-        pass
+        self.expect(TOK_WHILE)
+        test_expr = self.OR()
+        self.expect(TOK_DO)
+        while_stmts = self.stmts()
+        self.expect(TOK_END)
+        return WhileStmt(test_expr , while_stmts , line=self.prev_token().line)
 
+
+    # <forStmt> ::= "for" <assignment> , <expr> , (<expr>)? "do" <for_stmts> end
     def for_stmt(self):
-        pass
+        self.expect(TOK_FOR)
+        identifier = self.primary()
+        self.expect(TOK_ASSIGN)
+        start_exp = self.OR()
+        self.expect(TOK_COMMA)
+        end_expr = self.OR()
+        stepper_expr = None
+        if self.peek().token_type == TOK_COMMA:
+            self.expect(TOK_COMMA)
+            stepper_expr = self.OR()
+        self.expect(TOK_DO)
+        for_stmts = self.stmts()
+        return ForStmt(identifier, start_exp , end_expr , stepper_expr , for_stmts , line=self.prev_token().line)
+
+        
 
 
     def stmt(self):
@@ -202,6 +222,10 @@ class Parser:
             return self.printLn_stmt()
         elif self.peek().token_type == TOK_IF:
             return self.if_stmt()
+        elif self.peek().token_type == TOK_WHILE:
+            return self.while_stmt()
+        elif self.peek().token_type == TOK_FOR:
+            return self.for_stmt()
         else:
             #TODO: handle identifier and function call here.
             left = self.OR()

@@ -1,25 +1,5 @@
 
-x := 12
-z := 0
-println ("x is " + x)
-
-
-if true then
-	y := 2
-	if true then
-		println x + y
-		z := x + y
-	end
+for j := 10 , 0 , -3 do
+	println "j value is " + j
 end
 
-
-
-if x == 12  then
-	y := x * 2
-	println "y is local varible " + y
-else
-	z := y
-	println "z is equal to " + z
-end
-
-println z

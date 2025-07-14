@@ -202,6 +202,41 @@ class Interpreter:
             right_type , right_val = self.interpret(node.right , env)
             env.set_val(node.left.lexeme , (right_type , right_val))
 
+        
+        elif isinstance(node , WhileStmt):
+            while self.interpret(node.test_expr , env)[1]:
+                self.interpret(node.while_stmts , env.new_env())
+
+
+        elif isinstance(node , ForStmt):
+            identifier = node.identifier.lexeme
+            start_type , start_val = self.interpret(node.start_expr , env)
+            end_type , end_val  = self.interpret(node.end_expr , env)
+            new_env = env.new_env()
+            if start_val < end_val:
+                if node.stepper_expr is None:
+                    step_val = 1
+                else:
+                    step_type , step_val = self.interpret(node.stepper_expr , env)
+                while start_val <= end_val:
+                    newval = (TYPE_NUMBER , start_val)
+                    new_env.set_val(identifier , newval)
+                    self.interpret(node.for_stmts , new_env)
+                    start_val = start_val + step_val
+                
+            else:
+                if node.stepper_expr is None:
+                    step_val = -1
+                else:
+                    step_type , step_val = self.interpret(node.stepper_expr, env)
+   
+                while start_val >= end_val:
+                    newval = (TYPE_NUMBER , start_val)
+                    new_env.set_val(identifier , newval)
+                    self.interpret(node.for_stmts , new_env)
+                    start_val = start_val + step_val
+
+
 
     def interpret_ast(self , node):
         '''
