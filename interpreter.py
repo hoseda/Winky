@@ -6,6 +6,7 @@ from model import *
 from state import *
 from tokens import *
 from utils import stringify
+import codecs
 
 ###################################################################################
 #   Constants for runtime value                                                   #
@@ -175,11 +176,8 @@ class Interpreter:
 
         elif isinstance(node , PrintStmt):
             expr_type , expr_val = self.interpret(node.value , env)
-            print(stringify(expr_val), end="")
+            print(codecs.escape_decode(bytes(stringify(expr_val),"utf-8"))[0].decode("utf-8") , end=node.end)
 
-        elif isinstance(node , PrintLnStmt):
-            expr_type , expr_val = self.interpret(node.value , env)
-            print(stringify(expr_val))
 
         elif isinstance(node , IfStmt):
             test_type , test_val = self.interpret(node.test_expr , env)

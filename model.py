@@ -173,13 +173,14 @@ class PrintStmt(Stmt):
     '''
     print statement model
     '''
-    def __init__(self , val , line):
+    def __init__(self , val , line , end):
         assert isinstance(val , Expr) , val
         self.value = val
         self.line = line
+        self.end = end
 
     def __repr__(self) -> str:
-        return f"PrintStmt({self.value})"
+        return f"PrintStmt({self.value} , end:{self.end!r})"
 
 
 class PrintLnStmt(Stmt):

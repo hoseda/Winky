@@ -159,15 +159,10 @@ class Parser:
             And = LogicalOp(op , And , right , line=self.prev_token().line)
         return And
     
-    def print_stmt(self):
-        if self.match(TOK_PRINT):
+    def print_stmt(self , end):
+        if self.match(TOK_PRINT) or self.match(TOK_PRINTLN):
             val = self.OR()
-            return PrintStmt(val , line=self.prev_token().line)
-
-    def printLn_stmt(self):
-        if self.match(TOK_PRINTLN):
-            val = self.OR()
-            return PrintLnStmt(val , line=self.prev_token().line)
+            return PrintStmt(val , line=self.prev_token().line ,end=end)
       
       
     # <ifStmt> ::= "if" <test_expr> "then" <then_stmt> ("else" <else_stmt>)? "end"
@@ -217,9 +212,9 @@ class Parser:
     def stmt(self):
         #TODO: parse for assignment , while , if , else , print , end , etc , here.
         if self.peek().token_type == TOK_PRINT:
-            return self.print_stmt()
+            return self.print_stmt(end="")
         elif self.peek().token_type == TOK_PRINTLN:
-            return self.printLn_stmt()
+            return self.print_stmt(end = "\n")
         elif self.peek().token_type == TOK_IF:
             return self.if_stmt()
         elif self.peek().token_type == TOK_WHILE:
