@@ -5,6 +5,7 @@ from error import WinkyRuntimeError
 from model import *
 from state import *
 from tokens import *
+from utils import stringify
 
 ###################################################################################
 #   Constants for runtime value                                                   #
@@ -43,7 +44,7 @@ class Interpreter:
                 if lh_type == TYPE_NUMBER and rh_type == TYPE_NUMBER:
                     return (TYPE_NUMBER , lhs + rhs)
                 elif lh_type == TYPE_String or rh_type == TYPE_String:
-                    return (TYPE_String , str(lhs) + str(rhs))
+                    return (TYPE_String , stringify(lhs) + stringify(rhs))
                 else:
                     WinkyRuntimeError(f"Unsupported operator {node.op.lexeme!r} between {lh_type} and {rh_type}" , node.op.line)
             
@@ -174,11 +175,11 @@ class Interpreter:
 
         elif isinstance(node , PrintStmt):
             expr_type , expr_val = self.interpret(node.value , env)
-            print(expr_val , end="")
+            print(stringify(expr_val), end="")
 
         elif isinstance(node , PrintLnStmt):
             expr_type , expr_val = self.interpret(node.value , env)
-            print(expr_val)
+            print(stringify(expr_val))
 
         elif isinstance(node , IfStmt):
             test_type , test_val = self.interpret(node.test_expr , env)
