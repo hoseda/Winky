@@ -1,6 +1,5 @@
 # code object here.
 
-from sys import is_finalizing
 from tokens import Token
 
 
@@ -21,6 +20,13 @@ class Expr(Node):
 class Stmt(Node):
     '''
     Statement perform an action
+    '''
+    pass
+
+
+class Decl(Stmt):
+    '''
+    a statement for decleration.
     '''
     pass
 
@@ -251,3 +257,59 @@ class ForStmt(Stmt):
         return f"ForStmt(StartAssignment: [{self.identifier}], StartExpr: [{self.start_expr}] , EndExpr: [{self.end_expr}] , StepperExpr: [{self.stepper_expr}] , Stmts: [{self.for_stmts}])"
 
 
+
+class FuncDecl(Decl):
+    '''
+    <func_decl> ::= "func" <name> "(" <params>? ")" <body_stmts> "end"
+    '''
+    def __init__(self , name , params , body_stmts , line):
+        assert isinstance(name , str), name
+        assert all(isinstance(param , Decl) for param in params), params
+        assert isinstance(body_stmts , Stmts) , body_stmts
+        self.name = name
+        self.params = params
+        self.body_stmts = body_stmts
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"FuncDecl(name: [{self.name}] , params: [{self.params}] , bodyStmts: [{self.body_stmts}])"
+
+class Param(Decl):
+    '''
+    a single function parameter
+    '''
+    def __init__(self , name , line):
+        assert isinstance(name , str) , name
+        self.name = name
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"Param({self.name})"
+
+class FuncCall(Expr):
+    '''
+    functions also can work as Stmt and return no value.
+
+    <func_call>   ::=   <name> "(" <args>? ")"
+    <args>        ::=   <expr> ( "," <expr> )*    
+    '''
+    def __init__(self , name , args , line) -> None:
+        assert isinstance(name , str) , name
+        self.name = name
+        self.args = args
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"FuncCall(Name: [{self.name}] , Args: [{self.args}])"
+
+
+class FuncCallStmt(Stmt):
+    '''
+    a type of function call that wraps a function call expression in a statement
+    '''
+    def __init__(self , expr) -> None:
+        assert isinstance(expr , Expr) , expr
+        self.expr = expr
+
+    def __repr__(self) -> str:
+        return f"FuncCallStmt(Expr: [{self.expr}])"

@@ -7,6 +7,7 @@ from error import *
 from error import WinkySyntaxError
 from model import *
 from tokens import *
+import tokens
 
 
 class Parser:
@@ -68,10 +69,13 @@ class Parser:
             if (not self.match(TOK_RPAREN)) : WinkySyntaxError("unexpected error : needed a ')'" , self.prev_token().line)
             else : return Grouping(expr , line=self.prev_token().line)
         else:
-            #TODO: handle identifier and function calls here
-            # identifier
             identifier = self.expect(TOK_IDENTIFIER)
-            return Identifier(identifier.lexeme , line=self.prev_token().line)
+            if self.match(TOK_LPAREN):
+                args = self.args()
+                self.expect(TOK_RPAREN)
+                return FuncCall(identifier.lexeme,args , line=self.prev_token().line)
+            else:
+                return Identifier(identifier.lexeme , line=self.prev_token().line)
 
     # <Expo> ::= <primary> ('^' <primary>)*
     def Expo(self):
@@ -205,8 +209,36 @@ class Parser:
         self.expect(TOK_DO)
         for_stmts = self.stmts()
         return ForStmt(identifier, start_exp , end_expr , stepper_expr , for_stmts , line=self.prev_token().line)
+   
+    
+    def args(self):
+        args = []
+        while not self.peek().token_type == TOK_RPAREN:
+            arg = self.OR()
+            args.append(arg)
+            if not self.peek().token_type == TOK_RPAREN:
+                self.expect(TOK_COMMA)
+        return args
 
-        
+    def params(self):
+        params = []
+        while not self.peek().token_type == TOK_RPAREN:
+            name = self.expect(TOK_IDENTIFIER)
+            params.append(Param(name.lexeme , line=self.prev_token().line))
+            if not self.peek().token_type == TOK_RPAREN:
+                self.expect(TOK_COMMA)
+        return params
+    
+    #<func_decl> ::= "func" <name> "(" <params>? ")" <body_stmts> "end"
+    def func_decl(self):
+        self.expect(TOK_FUNC)
+        name = self.expect(TOK_IDENTIFIER)
+        self.expect(TOK_LPAREN)
+        params = self.params()
+        self.expect(TOK_RPAREN)
+        body_stmts = self.stmts()
+        self.expect(TOK_END)
+        return FuncDecl(name.lexeme , params , body_stmts , line=self.prev_token().line)
 
 
     def stmt(self):
@@ -221,15 +253,17 @@ class Parser:
             return self.while_stmt()
         elif self.peek().token_type == TOK_FOR:
             return self.for_stmt()
+        elif self.peek().token_type == TOK_FUNC:
+            return self.func_decl()
         else:
-            #TODO: handle identifier and function call here.
+            #handle identifier and function call here.
             left = self.OR()
             if self.match(TOK_ASSIGN):
                 right = self.OR()
                 return Assignment(left , right , line=self.prev_token().line)
             else:
-                #TODO: handle functoin call here.
-                pass
+                # handle functoin call statement here.
+                return FuncCallStmt(left)
 
     def stmts(self):
         stmts = []
