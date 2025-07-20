@@ -1,12 +1,10 @@
 # code enviroment here.
 
 
-from os import set_inheritable
-
-
 class Enviroment():
     def __init__(self , parent=None):
         self.vars = {}  # store variables here.
+        self.funcs = {} # store functions here.
         self.parent = parent
 
     def get_val(self , name):
@@ -29,9 +27,32 @@ class Enviroment():
             self = self.parent
         original_slef.vars[name] = value
 
+
+    def get_func(self,name):
+        while self:
+            val = self.funcs.get(name)
+            if val is not None:
+                return val
+            else:
+                self = self.parent
+        return None
+
+    
+    def set_func(self, name  , args , body):
+        original_self = self
+        value = (args , body)
+        while self:
+            if name in self.funcs:
+                self.funcs[name] = value
+                return value
+            else:
+                self = self.parent
+        original_self.funcs[name] = value
+
     def new_env(self):
         '''
         creating a nested child enviroment and the parent is this current enviroment.
         '''
         return Enviroment(parent=self)
+
 

@@ -1,6 +1,7 @@
 # code Winky interpreter here.
 
 
+from typing import ParamSpec
 from error import WinkyRuntimeError
 from model import *
 from state import *
@@ -234,6 +235,37 @@ class Interpreter:
                     new_env.set_val(identifier , newval)
                     self.interpret(node.for_stmts , new_env)
                     start_val = start_val + step_val
+
+
+        elif isinstance(node , FuncDecl):
+            env.set_func(node.name , node.params , node.body_stmts)
+
+        elif isinstance(node , FuncCall):
+            func = env.get_func(node.name)
+ 
+            if func is None:
+                WinkyRuntimeError(f"Undefined Function {node.name}" , line=node.line)
+
+            if len(func[0]) < len(node.args):
+                WinkyRuntimeError(f"Unexpected argument , Function {node.name} needs {func.params.lenght} but there is {node.args.lenght} here." , line=node.line)
+            elif len(func[0]) > len(node.args):
+                WinkyRuntimeError(f"Unexpected argument , Function {node.name} needs {func.params.lenght} but there is {node.args.lenght} here." , line=node.line)
+
+            else:
+                # create a new enviroment for local variable.
+                new_env = env.new_env()
+                # set values of params assigns with args
+                for i in range(0 , len(func[0])):
+                    right = self.interpret(node.args[i] , env)
+                    new_env.set_val(func[0][i].name , right)
+                    
+                self.interpret(func[1] , new_env) 
+
+
+            
+
+        elif isinstance(node , FuncCallStmt):
+            self.interpret(node.expr , env)
 
 
 

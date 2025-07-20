@@ -1,9 +1,9 @@
 
 func SayHi(name , age)
-	print "hello " + named + "with age " + age
+	println "hello " + name + " and you are " + age + " years old"
 end
 
 
-x := y + z + SayHi("ali" , 12)
+--x := SayHi("ali" , 20)
 
 SayHi("hoss" , 34)
