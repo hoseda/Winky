@@ -51,7 +51,7 @@ class Parser:
             return self.tokens[self.curr +1]
         else : WinkySyntaxError(f"Found {self.prev_token().lexeme!r} at the end of parsing." , self.prev_token().line)
 
-    # <primary> ::=  <number> | <bool> | <string> | <identifier> | '('<expr>')'
+    # <primary> ::=  <number> | <bool> | <string> | <identifier> | '('<expr>')' | <FuncCall>
     # <number>  ::=  <digit>+
     # <digit>   ::=  '0' | '1' | '2' | ... | '9'
     # <bool>    ::=  'true' | 'false'
@@ -85,7 +85,7 @@ class Parser:
         return primary
 
 
-    # <unary> ::= ('+' | '-' | '~') <unary> | <Parenthes>
+    # <unary> ::= ('+' | '-' | '~') <unary> | <Expo>
     def unary(self):
         if self.match(TOK_PLUS) or self.match(TOK_MINUS) or self.match(TOK_NOT):
             op = self.prev_token()
@@ -238,6 +238,14 @@ class Parser:
         return FuncDecl(name.lexeme , params , body_stmts , line=self.prev_token().line)
 
     
+    def local_assign(self):
+        self.expect(TOK_LOCAL)
+        left = self.OR()
+        self.expect(TOK_ASSIGN)
+        right = self.OR()
+        return LocalAssignment(left , right , line=self.prev_token().line)
+    
+
     def ret_stmt(self):
         self.expect(TOK_RET)
         expr = self.OR()
@@ -250,9 +258,9 @@ class Parser:
     #               |   for_stmt
     #               |   func_decl
     #               |   func_call
-    #               |   ret_stmt                                  
+    #               |   ret_stmt 
+    #               |   local_assign                                 
     def stmt(self):
-        #TODO: parse for assignment , while , if , else , print , end , etc , here.
         if self.peek().token_type == TOK_PRINT:
             return self.print_stmt(end="")
         elif self.peek().token_type == TOK_PRINTLN:
@@ -267,6 +275,8 @@ class Parser:
             return self.func_decl()
         elif self.peek().token_type == TOK_RET:
             return self.ret_stmt()
+        elif self.peek().token_type == TOK_LOCAL:
+            return self.local_assign()
         else:
             #handle identifier and function call here.
             left = self.OR()

@@ -50,6 +50,7 @@ TOK_TRUE        =   "TOK_TRUE"
 TOK_FALSE       =   "TOK_FALSE"
 TOK_AND         =   "TOK_AND"
 TOK_OR          =   "TOK_OR"
+TOK_LOCAL       =   "TOK_LOCAL"
 TOK_WHILE       =   "TOK_WHILE"
 TOK_FOR         =   "TOK_FOR"
 TOK_DO          =   "TOK_DO"
@@ -73,6 +74,7 @@ keywords = {
     'false' :   TOK_FALSE,
     'and'   :   TOK_AND,
     'or'    :   TOK_OR,
+    'local' :   TOK_LOCAL,
     'while' :   TOK_WHILE,
     'for'   :   TOK_FOR,
     'do'    :   TOK_DO,

@@ -26,6 +26,10 @@ class Enviroment():
                 return value
             self = self.parent
         original_slef.vars[name] = value
+        
+    
+    def set_local(self , name , value):
+        self.vars[name] = value
 
 
     def get_func(self,name):

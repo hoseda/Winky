@@ -1,11 +1,8 @@
-
-func SayHi(name , age)
-	ret "hello " + name + " and you are " + age + " years old\n"
---	SayHi("name" , "age")
+x := 0
+i := 1
+while i < 10 do
+  local x := 999 --> shadowing the previous x
+  println x
+  i := i + 1
 end
-
---y := "test text : "
---println y
-x := SayHi("ali" , 20)
-
-print x
+println x

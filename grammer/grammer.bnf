@@ -1,0 +1,74 @@
+(*
+grammmer of winky language
+*)
+
+
+(*
+evaluation of expressions
+*)
+
+digit   ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+
+integer ::= digit+
+
+float   ::= digit+'.'digit+     
+
+bool    ::=  'true' | 'false'
+
+lower   ::= 'a' | 'b' | 'c' | ... | 'y' | 'z'
+
+upper   ::= 'A' | 'B' | 'C' | ... | 'Y' | 'Z'
+
+alpha   ::= lower | upper
+  
+string  ::= '"' alpha* '"' | "'" alpha* "'"
+
+identifier  ::= ('_' | alpha) (alpha | integer)*
+
+primary ::= integer | "("expr")" | bool | string | identifier | FuncCall
+
+expo    ::= primary ( '^' primary)*
+
+unary   ::= ( '+' | '-' | '~') unary | expo
+
+mod     ::= unary ( '%' unary)*
+
+term    ::= mod ( ('*' | '/') mod)*
+
+addition   ::=  term ( ('+' | '-') term)*
+
+compa   ::= addition ( ('<' | '<=' | '>' | '>=') addition)*
+
+equal   ::= compa ( ('==' | '~=') equal)
+
+and     ::= equal ( 'and' equal)*
+
+expr    ::= and ( 'or' and)*
+
+
+(*
+parsing statements
+*)
+
+stmt    ::= printStmt | ifStmt | whileStmt | for_stmts | FuncDecl | FuncCall | RetStmt
+
+
+printStmt  ::= ("print" | "println") expr
+
+ifStmt  ::= "if" test_expr  "then"  then_stmt  ( "else" else_stmt )?  "end"
+
+whileStmt   ::= "while" test_expr  "do" while_stmts  "end"
+
+forStmt ::= "for" start_expr , end_expr , (stepper_expr)? "do" for_stmts "end"
+
+FuncDecl  ::=  "func" func_name "(" params ")"  body_stmts  "end"
+
+(* this type of function call may return a value *)
+FuncCall  ::=   func_name "(" args? ")" 
+
+args    ::= expr  ("," expr)*
+
+(* this type of function call doesn't return any value *)
+FuncCallStmt   ::=  FuncCall
+
+RetStmt ::= "ret"  expr

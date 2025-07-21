@@ -187,7 +187,7 @@ class Interpreter:
             else:
                 if node.else_stmt != None:
                     self.interpret(node.else_stmt , env.new_env())  # inside of the else is a local enviroment
-        
+     
         
         elif isinstance(node , Identifier):
             value = env.get_val(node.lexeme)
@@ -201,6 +201,11 @@ class Interpreter:
         elif isinstance(node , Assignment):
             right_type , right_val = self.interpret(node.right , env)
             env.set_val(node.left.lexeme , (right_type , right_val))
+        
+            
+        elif isinstance(node , LocalAssignment):
+            right_type , right_val = self.interpret(node.right , env)
+            env.set_local(node.left.lexeme , (right_type , right_val))
 
         
         elif isinstance(node , WhileStmt):
@@ -255,7 +260,7 @@ class Interpreter:
                 new_env = func[2].new_env()
                 # set values of params assigns with args
                 for param , arg in zip(func[0] , node.args):
-                    new_env.set_val(param.name , self.interpret(arg , env))
+                    new_env.set_local(param.name , self.interpret(arg , env)) 
                 
                 try:    
                     self.interpret(func[1] , new_env) 

@@ -174,6 +174,20 @@ class Assignment(Stmt):
 
     def __repr__(self) -> str:
         return f"Assigmnet({self.left} , {self.right})"
+    
+class LocalAssignment(Stmt):
+    '''
+    Example: local x := 12 , local y := x + 1
+    '''
+    def __init__(self , left , right , line):
+        assert isinstance(left , Identifier), left
+        assert isinstance(right , Expr), right
+        self.left =left
+        self.right =right
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"LocalAssigmnet({self.left} , {self.right})"
 
 class PrintStmt(Stmt):
     '''
