@@ -38,21 +38,18 @@ class Enviroment():
         return None
 
     
-    def set_func(self, name  , args , body):
-        original_self = self
-        value = (args , body)
-        while self:
-            if name in self.funcs:
-                self.funcs[name] = value
-                return value
-            else:
-                self = self.parent
-        original_self.funcs[name] = value
-
+    def set_func(self, name  , args , body , env):
+        value = (args , body , env)
+        self.funcs[name] = value
+    
     def new_env(self):
         '''
         creating a nested child enviroment and the parent is this current enviroment.
         '''
         return Enviroment(parent=self)
+
+
+    def __repr__(self) -> str:
+        return f"Enviroment(Vars: [{self.vars}] , Funcs: [{self.funcs}])"
 
 

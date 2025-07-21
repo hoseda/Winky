@@ -1,7 +1,6 @@
 # code Winky interpreter here.
 
 
-from typing import ParamSpec
 from error import WinkyRuntimeError
 from model import *
 from state import *
@@ -142,7 +141,7 @@ class Interpreter:
             if op_token == TOK_OR:
                 if lhs:
                     return (TYPE_BOOL , lhs)
-            elif op_token == TOK_AND:
+            elif op_token == dTOK_AND:
                 if not lhs:
                     return (TYPE_BOOL , lhs)
             return self.interpret(node.right , env)
@@ -173,6 +172,7 @@ class Interpreter:
         elif isinstance(node , Stmts):
             for stmt in node.stmts:
                 self.interpret(stmt , env)
+                
 
 
         elif isinstance(node , PrintStmt):
@@ -238,34 +238,36 @@ class Interpreter:
 
 
         elif isinstance(node , FuncDecl):
-            env.set_func(node.name , node.params , node.body_stmts)
+            env.set_func(node.name , node.params , node.body_stmts , env)
 
+    
         elif isinstance(node , FuncCall):
             func = env.get_func(node.name)
  
             if func is None:
                 WinkyRuntimeError(f"Undefined Function {node.name}" , line=node.line)
 
-            if len(func[0]) < len(node.args):
-                WinkyRuntimeError(f"Unexpected argument , Function {node.name} needs {func.params.lenght} but there is {node.args.lenght} here." , line=node.line)
-            elif len(func[0]) > len(node.args):
-                WinkyRuntimeError(f"Unexpected argument , Function {node.name} needs {func.params.lenght} but there is {node.args.lenght} here." , line=node.line)
+            elif len(func[0]) != len(node.args):
+                WinkyRuntimeError(f"Unexpected argument , Function {node.name} needs {len(func[0])} arguments but there is {len(node.args)} here." , line=node.line)
 
             else:
                 # create a new enviroment for local variable.
-                new_env = env.new_env()
+                new_env = func[2].new_env()
                 # set values of params assigns with args
-                for i in range(0 , len(func[0])):
-                    right = self.interpret(node.args[i] , env)
-                    new_env.set_val(func[0][i].name , right)
-                    
-                self.interpret(func[1] , new_env) 
-
-
-            
+                for param , arg in zip(func[0] , node.args):
+                    new_env.set_val(param.name , self.interpret(arg , env))
+                
+                try:    
+                    self.interpret(func[1] , new_env) 
+                except Return as e:
+                    return e.args[0]
 
         elif isinstance(node , FuncCallStmt):
             self.interpret(node.expr , env)
+
+        
+        elif isinstance(node , RetStmt):
+            raise Return(self.interpret(node.expr , env))
 
 
 
@@ -275,3 +277,7 @@ class Interpreter:
         '''
         env = Enviroment()
         self.interpret(node , env)
+
+
+class Return(Exception):
+    pass

@@ -313,3 +313,16 @@ class FuncCallStmt(Stmt):
 
     def __repr__(self) -> str:
         return f"FuncCallStmt(Expr: [{self.expr}])"
+
+
+class RetStmt(Stmt):
+    '''
+    return something or nothing. ret None , ret Expr
+    '''
+    def __init__(self , expr , line) -> None:
+        assert isinstance(expr , Expr) , expr
+        self.expr = expr
+        self.line = line
+
+    def __repr__(self) -> str:
+        return f"RetStmt({self.expr})"
