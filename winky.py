@@ -5,6 +5,11 @@ from interpreter import Interpreter as INTP
 from parser import *
 from tokens import *
 from lexer import *
+from error import *
+from vm import *
+from compiler import *
+
+DEBUG = False
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
@@ -15,7 +20,7 @@ if __name__ == "__main__":
                 exit()
             tks = Lexer(inp).tokenize()
             ast = Parser(tks).parse()
-            intp = INTP().interpret_ast(ast)
+            INTP().interpret_ast(ast)
 
 
     elif len(sys.argv) == 2:
@@ -25,26 +30,41 @@ if __name__ == "__main__":
 
         with open(filename) as file:
             source = file.read()
-        
-            print("##################################################################################") 
-            print("SOURCE:")
-            print(source)
-
-            print("##################################################################################")
-            print("LEXER:")
+            if len(source) == 0 : WinkyRuntimeError("Source Code is empty" , line=-1)
             tokens = Lexer(source).tokenize()
-            for tok in tokens:
-                print(tok)
-        
-            print("##################################################################################") 
-            print("PARSED AST:")
             ast = Parser(tokens).parse()
-            print(ast)
+
+            if DEBUG:
+        
+                print("##################################################################################") 
+                print("SOURCE:")
+                print(source)
+
+                print("##################################################################################")
+                print("LEXER:")
+            
+                for tok in tokens:
+                    print(tok)
+        
+                print("##################################################################################") 
+                print("PARSED AST:")
+            
+                print(ast)
       
-            print("##################################################################################") 
-            print("INTERPRETER:")
-            intp = INTP()
-            intp.interpret_ast(ast)
+                print("##################################################################################") 
+                print("INTERPRETER:")
+
+            
+            #intp = INTP()
+            #intp.interpret_ast(ast)
+
+
+            compiler = Compiler()
+            code = compiler.compile_code(ast)
+            print(code)
+            #vm = VM()
+            #vm.run(code)
+
 
     else:
         raise SystemExit("Usage : python3 winky.py <filename>")

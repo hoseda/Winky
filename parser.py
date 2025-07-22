@@ -1,10 +1,8 @@
 # code parser here
 
-from error import *
 from error import WinkySyntaxError
 from model import *
 from tokens import *
-import tokens
 
 
 class Parser:
@@ -286,8 +284,12 @@ class Parser:
             else:
                 # handle functoin call statement here.
                 return FuncCallStmt(left)
+            
 
     def stmts(self):
+        '''
+        generate list of statements.
+        '''
         stmts = []
         while self.curr < len(self.tokens) and not self.peek().token_type == TOK_ELSE and not self.peek().token_type == TOK_END:
             stmt = self.stmt()

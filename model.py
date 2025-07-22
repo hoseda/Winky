@@ -7,28 +7,24 @@ class Node:
     '''
     The parent class for every Node in AST.
     '''
-    pass
 
 
 class Expr(Node):
     '''
     Expresion evaluate to a result
     '''
-    pass
 
 
 class Stmt(Node):
     '''
     Statement perform an action
     '''
-    pass
 
 
 class Decl(Stmt):
     '''
     a statement for decleration.
     '''
-    pass
 
 
 class Integer(Expr):

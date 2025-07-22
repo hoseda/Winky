@@ -1,8 +1,2 @@
-x := 0
-i := 1
-while i < 10 do
-  local x := 999 --> shadowing the previous x
-  println x
-  i := i + 1
-end
-println x
+
+print 3 + 1
