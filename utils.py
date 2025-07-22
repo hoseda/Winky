@@ -1,5 +1,9 @@
 # code utils of winky here.
 
+TYPE_NUMBER = "TYPE_NUMBER"
+TYPE_STRING = "TYPE_STRING"
+TYPE_BOOL   = "TYPE_BOOL"
+
 
 def prettyPrint(ast):
     # this function here will use to print ast pretty.
@@ -27,3 +31,13 @@ def stringify(val):
     return str(val)
 
 
+
+
+def formatting_code_generation(code : list):
+    for i  in code:
+        if i[0] == 'LABLE':
+            print(f"{i[1]}:")
+        elif i[0] == 'PUSH':
+            print(f"    PUSH {stringify(i[1][1])}")
+        else:
+            print(f"    {i[0]}")

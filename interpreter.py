@@ -141,7 +141,7 @@ class Interpreter:
             if op_token == TOK_OR:
                 if lhs:
                     return (TYPE_BOOL , lhs)
-            elif op_token == dTOK_AND:
+            elif op_token == TOK_AND:
                 if not lhs:
                     return (TYPE_BOOL , lhs)
             return self.interpret(node.right , env)

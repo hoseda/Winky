@@ -5,9 +5,6 @@ from model import *
 from tokens import *
 from utils import *
 
-TYPE_NUMBER = "TYPE_NUMBER"
-TYPE_STRING = "TYPE_STRING"
-TYPE_BOOL   = "TYPE_BOOL"
 
 class Compiler:
     def __init__(self) -> None:
@@ -21,43 +18,118 @@ class Compiler:
             value = (TYPE_NUMBER , float(node.value))
             self.emit(('PUSH' , value))
         
-        if isinstance(node , Float):
+        elif isinstance(node , Float):
             value = (TYPE_NUMBER , float(node.value))
             self.emit(('PUSH' , value))
         
-        if isinstance(node , String):
-            value = (TYPE_STRING , node.value)
+        elif isinstance(node , String):
+            value = (TYPE_STRING , stringify(node.value))
             self.emit(('PUSH' , value))
         
-        if isinstance(node , Bool):
+        elif isinstance(node , Bool):
             value = ()
             if node.value:
-                value = (TYPE_BOOL , 1)
+                value = (TYPE_BOOL , True)
             else:
-                value = (TYPE_BOOL , 0)
+                value = (TYPE_BOOL , False)
             self.emit(('PUSH' , value))
 
-
-        
-        if isinstance(node , BinOp):
+        elif isinstance(node , BinOp):
             self.compile(node.left)
             self.compile(node.right)
             
             op = node.op.token_type
             if op == TOK_PLUS:
                 self.emit(('ADD',))
+            elif op == TOK_MINUS:
+                self.emit(("SUB",))
+            elif op == TOK_STAR:
+                self.emit(("MUL",))
+            elif op == TOK_SLASH:
+                self.emit(("DIV",))
+            elif op == TOK_CARET:
+                self.emit(("EXP",))
+            elif op == TOK_MOD:
+                self.emit(("MOD",))
+            elif op == TOK_EQEQ:
+                self.emit(("EQ",))
+            elif op == TOK_NE:
+                self.emit(("NE",))
+            elif op == TOK_GT:
+                self.emit(("GT",))
+            elif op == TOK_GE:
+                self.emit(("GE",))
+            elif op == TOK_LT:
+                self.emit(("LT",))
+            elif op == TOK_LE:
+                self.emit(("LE",))
+            else:
+                #TODO: COMPILE XOR TOO.
+                pass
+        
+        elif isinstance(node , LogicalOp):
+            self.compile(node.left)
+            self.compile(node.right)
 
+            op = node.op.token_type
 
-        if isinstance(node , PrintStmt):
+            if op == TOK_OR:
+                self.emit(("OR",))
+            elif op == TOK_AND:
+                self.emit(("AND",))
+
+        elif isinstance(node , UnOp):
             self.compile(node.value)
-            self.emit(('PRINT',))
+            op = node.op.token_type
 
-        if isinstance(node , Stmts):
+            if op == TOK_MINUS:
+                self.emit(("NEG",))
+            elif op == TOK_NOT:
+                self.emit(("PUSH" , (TYPE_NUMBER, 1)))
+                self.emit(("XOR",))
+
+        # compile statements here.
+
+        elif isinstance(node , Stmts):
             for stmt in node.stmts:
                 self.compile(stmt)
 
+        elif isinstance(node , PrintStmt):
+            self.compile(node.value)
+            if node.end == "":
+                self.emit(('PRINT',))
+            else:
+                self.emit(("PRINTLN",))
+
+        elif isinstance(node , IfStmt):
+            pass
+
+        elif isinstance(node , ForStmt):
+            pass
+
+        elif isinstance(node , WhileStmt):
+            pass
+
+        elif isinstance(node , FuncDecl):
+            pass
+
+        elif isinstance(node , FuncCall):
+            pass
+
+        elif isinstance(node , FuncCallStmt):
+            pass
+
+        elif isinstance(node , RetStmt):
+            pass 
+
     
 
-    def compile_code(self , node) -> list:
+    def generate_code(self , node) -> list:
+        '''
+        the starter function.
+        returns a [List]
+        '''
+        self.emit(("LABLE" , "START"))
         self.compile(node)
+        self.emit(("HALT",))
         return self.code
