@@ -63,9 +63,6 @@ class Compiler:
                 self.emit(("LT",))
             elif op == TOK_LE:
                 self.emit(("LE",))
-            else:
-                #TODO: COMPILE XOR TOO.
-                pass
         
         elif isinstance(node , LogicalOp):
             self.compile(node.left)
@@ -87,6 +84,9 @@ class Compiler:
             elif op == TOK_NOT:
                 self.emit(("PUSH" , (TYPE_NUMBER, 1)))
                 self.emit(("XOR",))
+
+        elif isinstance(node , Grouping):
+            self.compile(node.value)
 
         # compile statements here.
 
