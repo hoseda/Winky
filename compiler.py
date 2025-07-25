@@ -1,14 +1,24 @@
 # code compier here.
 # compiler generate the byte-code assocaited to souce code
 
+
 from model import *
 from tokens import *
 from utils import *
+from error import *
 
+class Symbol:
+    def __init__(self , name) -> None:
+        self.name = name
+    
+    def __repr__(self) -> str:
+        return f"Symbol({self.name})"
 
 class Compiler:
     def __init__(self) -> None:
         self.code = []
+        self.globals = []
+        self.num_globals = 0
         self.lbli = 0
 
     def emit(self , instruction : tuple):
@@ -18,6 +28,13 @@ class Compiler:
         lbl = f"LBL{self.lbli}"  
         self.lbli += 1
         return lbl
+    
+    def get_symbol(self , name):
+        for symbol in self.globals:
+            if name == symbol.name:
+                return symbol
+            
+        return None
     
     def compile(self , node):
         if isinstance(node , Integer):
@@ -150,7 +167,24 @@ class Compiler:
             
             self.emit(("LABEL" , exit_label))
 
+        elif isinstance(node , Assignment):
+            self.compile(node.right)
+            symbol = self.get_symbol(node.left.lexeme)
 
+            if not symbol:
+                new_symbol = Symbol(node.left.lexeme)
+                self.globals.append(new_symbol)
+                self.emit(("STORE_GLOBAL" , new_symbol.name))
+                self.num_globals += 1
+            else:
+                self.emit(("STORE_GLOBAL" , symbol.name))
+
+        elif isinstance(node , Identifier):
+            symbol = self.get_symbol(node.lexeme)
+            if not symbol:
+                WinkyCompileError(f"Undeclared Identifier {node.lexeme}" , line=node.line)
+            else:
+                self.emit(("LOAD_GLOBAL" , symbol.name))
 
         elif isinstance(node , ForStmt):
             pass

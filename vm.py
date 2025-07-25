@@ -11,6 +11,7 @@ class VM:
         self.pc = 0
         self.sp = 0
         self.labels = {}
+        self.globals = {}
         self.is_running = False
 
 
@@ -45,7 +46,7 @@ class VM:
                 self.is_running = False
                 print("<<-----END OF THE PROGRAM------>>")
 
-            elif instruction[0] == 'LABLE' and instruction[1] == 'START':
+            elif instruction[0] == 'LABEL' and instruction[1] == 'START':
                 print("\n<<-----ENTERING START BLOCK----->>")
 
             elif instruction[0] == "PUSH":
@@ -68,7 +69,7 @@ class VM:
                         res = left[1] + right[1]
                         self.push((TYPE_NUMBER, res))
                     elif left[0] == TYPE_STRING or right[0] == TYPE_STRING:
-                        res = str(left[1]) + str(right[1])
+                        res = stringify(left[1]) + stringify(right[1])
                         self.push((TYPE_STRING, res))
                     else:
                         WinkyVMError(
@@ -242,4 +243,11 @@ class VM:
                     val_type ,val = self.pop()
                     if val == 0 or val == False:
                         self.pc = self.labels[instruction[1]]
+
+                elif instruction[0] == "STORE_GLOBAL":
+                    self.globals[instruction[1]] = self.pop()
+                
+                elif instruction[0] == "LOAD_GLOBAL":
+                    val = self.globals.get(instruction[1])
+                    self.push(val)
                 
