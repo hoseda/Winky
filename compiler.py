@@ -9,9 +9,15 @@ from utils import *
 class Compiler:
     def __init__(self) -> None:
         self.code = []
+        self.lbli = 0
 
     def emit(self , instruction : tuple):
-        self.code.append(instruction)    
+        self.code.append(instruction)
+
+    def make_label(self):
+        lbl = f"LBL{self.lbli}"  
+        self.lbli += 1
+        return lbl
     
     def compile(self , node):
         if isinstance(node , Integer):
@@ -82,7 +88,7 @@ class Compiler:
             if op == TOK_MINUS:
                 self.emit(("NEG",))
             elif op == TOK_NOT:
-                self.emit(("PUSH" , (TYPE_NUMBER, 1)))
+                self.emit(("PUSH" , (TYPE_BOOL, True)))
                 self.emit(("XOR",))
 
         elif isinstance(node , Grouping):
@@ -101,8 +107,50 @@ class Compiler:
             else:
                 self.emit(("PRINTLN",))
 
+        # if statement is like this :
+        ##  if <test> then
+        ##      <then_block>
+        ##  else
+        ##      <else_block>
+        # and in byte-code or assembly its like this :
+        ##  IF not <test> JMP L1
+        ##  <then_block>
+        ##  ....
+        ##  JMP L2
+        ##  L1:
+        ##      <else_block>
+        ##      ....
+        ##  L2:
+        # so here we should act like this :
+        # 1) compile the test expression.
+        # 2) make labels for then blok , else block and exit.
+        # 3) first thing to emit is ("JMPZ" , else_label). the meaning is if test_expr is ZERO/FALSE jump to else_lable and  run the code in there.
+        # 4) next one to emit is ("LABEL" , then_label). the meaning is if we didn't jump to else_label then we have to run the code in then_label.
+        #    we also compile the code in it.
+        # 5) after compiling the code in then_label we should jump to exit_label , and also we emit the else label to chunk of code but only if 
+        #    there is an else block , we compile code in that block too.
+        # 6) in the end we emit the exit_label.
         elif isinstance(node , IfStmt):
-            pass
+            self.compile(node.test_expr)
+
+            then_label = self.make_label()
+            else_label = self.make_label()
+            exit_label = self.make_label()
+            
+            self.emit(("JMPZ" , else_label))
+
+            self.emit(("LABEL" , then_label))
+            self.compile(node.then_stmt)
+
+            self.emit(("JMP" , exit_label))
+            self.emit(("LABEL" , else_label))
+
+            if node.else_stmt:
+                self.compile(node.else_stmt)
+            
+            self.emit(("LABEL" , exit_label))
+
+
 
         elif isinstance(node , ForStmt):
             pass
@@ -129,7 +177,7 @@ class Compiler:
         the starter function.
         returns a [List]
         '''
-        self.emit(("LABLE" , "START"))
+        self.emit(("LABEL" , "START"))
         self.compile(node)
         self.emit(("HALT",))
         return self.code

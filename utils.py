@@ -1,5 +1,9 @@
 # code utils of winky here.
 
+from dis import Instruction
+from operator import le
+
+
 TYPE_NUMBER = "TYPE_NUMBER"
 TYPE_STRING = "TYPE_STRING"
 TYPE_BOOL   = "TYPE_BOOL"
@@ -35,9 +39,16 @@ def stringify(val):
 
 def formatting_code_generation(code : list):
     for i  in code:
-        if i[0] == 'LABLE':
+        if i[0] == 'LABEL':
             print(f"{i[1]}:")
-        elif i[0] == 'PUSH':
-            print(f"    PUSH {stringify(i[1][1])}")
+            continue
+        if i[0] == "PUSH":
+            print(f"    {i[0]} {stringify(i[1][1])}")
+        elif len(i) == 1:
+            print(f"    {stringify(i[0])}")
+            continue
+        elif len(i) == 2:
+            print(f"    {stringify(i[0])} {stringify(i[1])}")
+            continue
         else:
             print(f"    {i[0]}")

@@ -16,3 +16,6 @@ def WinkyRuntimeError(message , line) -> str:
     print(f"RUNTIME ERROR at Line[{line}] , MESSAGE : {message}")
     sys.exit()
 
+def WinkyVMError(message , line) -> str:
+    print(f"VM ERROR at Line[{line}] , MESSAGE : {message}")
+    sys.exit()
