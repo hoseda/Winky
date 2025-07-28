@@ -1,7 +1,5 @@
 # here is the vm.
 
-from ast import Pass
-from textwrap import indent
 from utils import *
 from error import *
 
@@ -243,7 +241,7 @@ class VM:
 
                 elif instruction[0] == "JMPZ":
                     val_type ,val = self.pop()
-                    if val == 0 or val == False:
+                    if val in (0 , False):
                         self.pc = self.labels[instruction[1]]
 
                 elif instruction[0] == "STORE_GLOBAL":
@@ -261,5 +259,3 @@ class VM:
                     indx = instruction[1]
                     val = self.pop()
                     self.stack.insert(indx , val)
-                    
-                

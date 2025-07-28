@@ -1,15 +1,6 @@
-x := 100
-y := 200
-z := 300
+i := 1
 
-println x
-println y
-
-a := (x + 1) / y
-
-println a
-
-if 55 % 3 == 1 then
-    p := 2 * a
+while i <= 10 do
+    println i
+    i := i + 1
 end
-

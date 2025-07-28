@@ -32,18 +32,21 @@ class Compiler:
         return lbl
     
     def get_symbol(self , name) -> (tuple[Symbol , int] | None):
-        # LOCALS
-        i_depth = 0
-        for symbol in self.locals:
-            if name == symbol.name:
-                return (symbol , i_depth)
-            i_depth += 1
+        
         # GLOBALS       
         i_depth = 0 
         for symbol in self.globals:
             if name == symbol.name:
                 return (symbol , i_depth)
             i_depth += 1
+
+        # LOCALS
+        i_depth = 0
+        for symbol in self.locals:
+            if name == symbol.name:
+                return (symbol , i_depth)
+            i_depth += 1
+
         return None
 
     def begin_scope(self):
@@ -56,7 +59,7 @@ class Compiler:
             self.emit(("POP",))
             self.locals.pop()
             i -= 1
-            
+
     def compile(self , node):
         if isinstance(node , Integer):
             value = (TYPE_NUMBER , float(node.value))
@@ -195,18 +198,19 @@ class Compiler:
         elif isinstance(node , Assignment):
             self.compile(node.right)
             symbol = self.get_symbol(node.left.lexeme)
-
+            print(symbol)
             if not symbol:
                 new_symbol = Symbol(node.left.lexeme , self.scope_depth)
                 if new_symbol.depth == 0:
                     self.globals.append(new_symbol)
-                    self.emit(("STORE_GLOBAL" , len(self.globals) - 1))
+                    new_slot = len(self.globals) -1
+                    self.emit(("STORE_GLOBAL" , new_slot))
                 else:
                     self.locals.append(new_symbol)
-                    self.emit(("STORE_LOCAL" , len(self.locals) -1))
+                    #self.emit(("STORE_LOCAL" , len(self.locals) -1))
             else:
                 symb , slot = symbol 
-                if self.scope_depth == 0:
+                if symb.depth == 0:
                     self.emit(("STORE_GLOBAL" , slot))
                 else:
                     self.emit(("STORE_LOCAL" , slot))
@@ -218,6 +222,7 @@ class Compiler:
             else:
                 symb , slot = symbol
                 if symb.depth == 0:
+                    print(symb)
                     self.emit(("LOAD_GLOBAL" , slot))
                 else:
                     self.emit(("LOAD_LOCAL" , slot))
@@ -226,7 +231,19 @@ class Compiler:
             pass
 
         elif isinstance(node , WhileStmt):
-            pass
+            test_label = self.make_label()
+            body_label = self.make_label()
+            exit_label = self.make_label()
+            self.emit(("LABEL" , test_label))
+            self.compile(node.test_expr)
+            self.emit(("JMPZ" , exit_label))
+            self.emit(("LABEL" , body_label))
+            self.begin_scope()
+            self.compile(node.while_stmts)
+            self.end_scope()
+            self.emit(("JMP" , test_label))
+            self.emit(("LABEL" , exit_label))
+
 
         elif isinstance(node , FuncDecl):
             pass
