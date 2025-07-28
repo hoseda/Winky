@@ -1,5 +1,6 @@
 # here is the vm.
 
+from ast import Pass
 from textwrap import indent
 from utils import *
 from error import *
@@ -25,12 +26,12 @@ class VM:
 
     def push(self, value):
         self.stack.append(value)
-        print(f"NOTIC: {value} WAS PUSHED.")
+        #print(f"NOTIC: {value} WAS PUSHED.")
         self.sp += 1
 
     def pop(self):
         val = self.stack.pop()
-        print(f"NOTIC: {val} WAS POPED.")
+        #print(f"NOTIC: {val} WAS POPED.")
         self.sp -= 1
         return val
 
@@ -44,10 +45,11 @@ class VM:
             self.pc += 1
             if instruction[0] == "HALT":
                 self.is_running = False
-                print("<<-----END OF THE PROGRAM------>>")
+                #print("<<-----END OF THE PROGRAM------>>")
 
             elif instruction[0] == 'LABEL' and instruction[1] == 'START':
-                print("\n<<-----ENTERING START BLOCK----->>")
+                #print("\n<<-----ENTERING START BLOCK----->>")
+                pass
 
             elif instruction[0] == "PUSH":
                 val = instruction[1]
@@ -56,11 +58,11 @@ class VM:
             else:
                 if instruction[0] == "PRINT":
                     val = self.pop()
-                    print(stringify(val), end='')
+                    print(stringify(val[1]), end='')
 
                 elif instruction[0] == "PRINTLN":
                     val = self.pop()
-                    print(stringify(val), end="\n")
+                    print(stringify(val[1]), end="\n")
 
                 elif instruction[0] == "ADD":
                     right = self.pop()
@@ -250,4 +252,14 @@ class VM:
                 elif instruction[0] == "LOAD_GLOBAL":
                     val = self.globals.get(instruction[1])
                     self.push(val)
+                
+                elif instruction[0] == "LOAD_LOCAL":
+                    val = self.stack[instruction[1]]
+                    self.push(val)
+                
+                elif instruction[0] == "STORE_LOCAL":
+                    indx = instruction[1]
+                    val = self.pop()
+                    self.stack.insert(indx , val)
+                    
                 

@@ -8,18 +8,20 @@ from utils import *
 from error import *
 
 class Symbol:
-    def __init__(self , name) -> None:
+    def __init__(self , name , depth=0) -> None:
         self.name = name
-    
+        self.depth = depth
+
     def __repr__(self) -> str:
-        return f"Symbol({self.name})"
+        return f"Symbol(NAME:[{self.name}] , DEPTH:[{self.depth}])"
 
 class Compiler:
     def __init__(self) -> None:
         self.code = []
         self.globals = []
-        self.num_globals = 0
         self.lbli = 0
+        self.scope_depth = 0
+        self.locals = []
 
     def emit(self , instruction : tuple):
         self.code.append(instruction)
@@ -29,13 +31,32 @@ class Compiler:
         self.lbli += 1
         return lbl
     
-    def get_symbol(self , name):
+    def get_symbol(self , name) -> (tuple[Symbol , int] | None):
+        # LOCALS
+        i_depth = 0
+        for symbol in self.locals:
+            if name == symbol.name:
+                return (symbol , i_depth)
+            i_depth += 1
+        # GLOBALS       
+        i_depth = 0 
         for symbol in self.globals:
             if name == symbol.name:
-                return symbol
-            
+                return (symbol , i_depth)
+            i_depth += 1
         return None
-    
+
+    def begin_scope(self):
+        self.scope_depth += 1
+
+    def end_scope(self):
+        self.scope_depth -= 1
+        i = len(self.locals) -1
+        while len(self.locals) > 0 and self.locals[i].depth > self.scope_depth:
+            self.emit(("POP",))
+            self.locals.pop()
+            i -= 1
+            
     def compile(self , node):
         if isinstance(node , Integer):
             value = (TYPE_NUMBER , float(node.value))
@@ -157,13 +178,17 @@ class Compiler:
             self.emit(("JMPZ" , else_label))
 
             self.emit(("LABEL" , then_label))
+            self.begin_scope()
             self.compile(node.then_stmt)
+            self.end_scope()
 
             self.emit(("JMP" , exit_label))
             self.emit(("LABEL" , else_label))
 
             if node.else_stmt:
+                self.begin_scope()
                 self.compile(node.else_stmt)
+                self.end_scope()
             
             self.emit(("LABEL" , exit_label))
 
@@ -172,19 +197,30 @@ class Compiler:
             symbol = self.get_symbol(node.left.lexeme)
 
             if not symbol:
-                new_symbol = Symbol(node.left.lexeme)
-                self.globals.append(new_symbol)
-                self.emit(("STORE_GLOBAL" , new_symbol.name))
-                self.num_globals += 1
+                new_symbol = Symbol(node.left.lexeme , self.scope_depth)
+                if new_symbol.depth == 0:
+                    self.globals.append(new_symbol)
+                    self.emit(("STORE_GLOBAL" , len(self.globals) - 1))
+                else:
+                    self.locals.append(new_symbol)
+                    self.emit(("STORE_LOCAL" , len(self.locals) -1))
             else:
-                self.emit(("STORE_GLOBAL" , symbol.name))
+                symb , slot = symbol 
+                if self.scope_depth == 0:
+                    self.emit(("STORE_GLOBAL" , slot))
+                else:
+                    self.emit(("STORE_LOCAL" , slot))
 
         elif isinstance(node , Identifier):
             symbol = self.get_symbol(node.lexeme)
             if not symbol:
                 WinkyCompileError(f"Undeclared Identifier {node.lexeme}" , line=node.line)
             else:
-                self.emit(("LOAD_GLOBAL" , symbol.name))
+                symb , slot = symbol
+                if symb.depth == 0:
+                    self.emit(("LOAD_GLOBAL" , slot))
+                else:
+                    self.emit(("LOAD_LOCAL" , slot))
 
         elif isinstance(node , ForStmt):
             pass
