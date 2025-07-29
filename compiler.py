@@ -2,15 +2,24 @@
 # compiler generate the byte-code assocaited to souce code
 
 
+from hmac import new
+from pickle import NONE
 from model import *
 from tokens import *
 from utils import *
 from error import *
 
+
+SYM_VAR = "SYM_VAR"
+SYM_FUNC = "SYM_FUNC"
+
+
 class Symbol:
-    def __init__(self , name , depth=0) -> None:
+    def __init__(self , name , stype=SYM_VAR , depth=0 , arity=0) -> None:
         self.name = name
+        self.stype = stype
         self.depth = depth
+        self.arity = arity
 
     def __repr__(self) -> str:
         return f"Symbol(NAME:[{self.name}] , DEPTH:[{self.depth}])"
@@ -19,6 +28,7 @@ class Compiler:
     def __init__(self) -> None:
         self.code = []
         self.globals = []
+        self.funcs = []
         self.lbli = 0
         self.scope_depth = 0
         self.locals = []
@@ -32,21 +42,22 @@ class Compiler:
         return lbl
     
     def get_symbol(self , name) -> (tuple[Symbol , int] | None):
-        
-        # GLOBALS       
-        i_depth = 0 
-        for symbol in self.globals:
-            if name == symbol.name:
-                return (symbol , i_depth)
-            i_depth += 1
-
         # LOCALS
-        i_depth = 0
-        for symbol in self.locals:
+        for index , symbol in reversed(list(enumerate(self.locals))):
             if name == symbol.name:
-                return (symbol , i_depth)
-            i_depth += 1
+                return (symbol , index)
+        
+        # GLOBALS        
+        for index , symbol in reversed(list(enumerate(self.globals))):
+            if name == symbol.name:
+                return (symbol , index)
 
+        return None
+    
+    def get_func(self , name):
+        for func in reversed(self.funcs):
+            if name == func.name:
+                return func
         return None
 
     def begin_scope(self):
@@ -198,16 +209,15 @@ class Compiler:
         elif isinstance(node , Assignment):
             self.compile(node.right)
             symbol = self.get_symbol(node.left.lexeme)
-            print(symbol)
             if not symbol:
-                new_symbol = Symbol(node.left.lexeme , self.scope_depth)
+                new_symbol = Symbol(node.left.lexeme , SYM_VAR, self.scope_depth)
                 if new_symbol.depth == 0:
                     self.globals.append(new_symbol)
                     new_slot = len(self.globals) -1
                     self.emit(("STORE_GLOBAL" , new_slot))
                 else:
                     self.locals.append(new_symbol)
-                    #self.emit(("STORE_LOCAL" , len(self.locals) -1))
+                    self.emit(("SET_LOCAL" , str(len(self.locals) -1) + f" [{new_symbol.name}]"))
             else:
                 symb , slot = symbol 
                 if symb.depth == 0:
@@ -222,12 +232,12 @@ class Compiler:
             else:
                 symb , slot = symbol
                 if symb.depth == 0:
-                    print(symb)
                     self.emit(("LOAD_GLOBAL" , slot))
                 else:
                     self.emit(("LOAD_LOCAL" , slot))
 
         elif isinstance(node , ForStmt):
+            #TODO: THIS IS THE HARD ONE , WILL DO IT LAST.
             pass
 
         elif isinstance(node , WhileStmt):
@@ -246,13 +256,43 @@ class Compiler:
 
 
         elif isinstance(node , FuncDecl):
-            pass
+            func = self.get_func(node.name)
+            var = self.get_symbol(node.name)
+            if var:
+                WinkyCompileError(f"Already Defined a variable with name {node.name}." , node.line)
+            if func:
+                WinkyCompileError(f"Function is already defined {node.name}" , line=node.line)
+            else:
+                new_func = Symbol(node.name , SYM_FUNC ,depth=self.scope_depth , arity=len(node.params))
+                self.funcs.append(new_func)
+                end_label = self.make_label()
+                self.emit(("JMP" , end_label))
+                self.emit(("LABEL" , new_func.name))
+                self.begin_scope()
+                for param in node.params:
+                    new_symbol = Symbol(param.name , SYM_VAR , self.scope_depth)
+                    self.locals.append(new_symbol)
+                    self.emit(("SET_LOCAL" , str(len(self.locals) -1) + f" {new_symbol.name}"))
+
+                self.compile(node.body_stmts)
+                self.end_scope()
+                self.emit(("RET",))
+                self.emit(("LABEL" , end_label))
 
         elif isinstance(node , FuncCall):
-            pass
+            func = self.get_func(node.name)
+            if not func:
+                WinkyCompileError(f"Undeclared function {node.name}" , line=node.line)
+            elif func.arity != len(node.args):
+                WinkyCompileError(f"Function expected {func.arity} params but {len(node.args)} were passed." , node.line)
+            else:
+                for arg in node.args:
+                    self.compile(arg)
+                self.emit(("CALL" , func.name))
+                
 
         elif isinstance(node , FuncCallStmt):
-            pass
+            self.compile(node.expr)
 
         elif isinstance(node , RetStmt):
             pass 

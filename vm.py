@@ -1,12 +1,20 @@
 # here is the vm.
 
+from hmac import new
 from utils import *
 from error import *
 
 
+class Frame:
+    def __init__(self , name , ret_pc , fp) -> None:
+        self.name = name
+        self.ret_pc = ret_pc
+        self.fp = fp
+
 class VM:
     def __init__(self) -> None:
         self.stack = []
+        self.frames = []
         self.pc = 0
         self.sp = 0
         self.labels = {}
@@ -259,3 +267,15 @@ class VM:
                     indx = instruction[1]
                     val = self.pop()
                     self.stack.insert(indx , val)
+                
+                elif instruction[0] == "SET_LOCAL":
+                    pass
+
+                elif instruction[0] == "CALL":
+                    new_frame = Frame(instruction[1] , ret_pc=self.pc , fp=self.sp)
+                    self.frames.append(new_frame)
+                    self.pc = self.labels[instruction[1]]
+                
+                elif instruction[0] == "RET":
+                    self.pc = self.frames[-1].ret_pc
+                    self.frames.pop()
