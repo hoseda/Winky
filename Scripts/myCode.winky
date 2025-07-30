@@ -1,9 +1,8 @@
-i := 1
-
-func say(a , b , c)
-    println a
-    println b
-    println c + i
+x := 10
+func add(a,b)
+    local x := 0
+    println x
+    ret a + b
 end
 
-say("str1" , true , 12 / 3 ^ 2 -5)
+println add(10 , 2)

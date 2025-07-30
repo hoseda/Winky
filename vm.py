@@ -260,11 +260,16 @@ class VM:
                     self.push(val)
                 
                 elif instruction[0] == "LOAD_LOCAL":
-                    val = self.stack[instruction[1]]
+                    slot = instruction[1]
+                    if len(self.frames) > 0:
+                        slot += self.frames[-1].fp
+                    val = self.stack[slot]
                     self.push(val)
                 
                 elif instruction[0] == "STORE_LOCAL":
                     indx = instruction[1]
+                    if len(self.frames) > 0:
+                        indx += self.frames[-1].fp
                     val = self.pop()
                     self.stack.insert(indx , val)
                 
@@ -272,10 +277,16 @@ class VM:
                     pass
 
                 elif instruction[0] == "CALL":
-                    new_frame = Frame(instruction[1] , ret_pc=self.pc , fp=self.sp)
+                    _ , numargs = self.pop()
+                    base_fp = self.sp - numargs
+                    new_frame = Frame(instruction[1] , ret_pc=self.pc , fp=base_fp)
                     self.frames.append(new_frame)
                     self.pc = self.labels[instruction[1]]
                 
                 elif instruction[0] == "RET":
+                    res = self.stack[self.sp -1]
+                    while self.sp > self.frames[-1].fp:
+                        self.pop()
+                    self.push(res)
                     self.pc = self.frames[-1].ret_pc
                     self.frames.pop()

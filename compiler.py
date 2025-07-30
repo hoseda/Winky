@@ -4,6 +4,8 @@
 
 from hmac import new
 from pickle import NONE
+
+from yaml import emit
 from model import *
 from tokens import *
 from utils import *
@@ -276,6 +278,7 @@ class Compiler:
 
                 self.compile(node.body_stmts)
                 self.end_scope()
+                self.emit(("PUSH", (TYPE_NUMBER , 0)))
                 self.emit(("RET",))
                 self.emit(("LABEL" , end_label))
 
@@ -288,14 +291,25 @@ class Compiler:
             else:
                 for arg in node.args:
                     self.compile(arg)
+                numargs = (TYPE_NUMBER , len(node.args))
+                self.emit(("PUSH" , numargs))
                 self.emit(("CALL" , func.name))
                 
 
         elif isinstance(node , FuncCallStmt):
             self.compile(node.expr)
+            self.emit(("POP",))
 
         elif isinstance(node , RetStmt):
-            pass 
+            self.compile(node.expr)
+            self.emit(("RET",))
+
+        elif isinstance(node , LocalAssignment):
+            self.compile(node.right)
+            new_symbol = Symbol(node.left.lexeme , SYM_VAR , self.scope_depth)
+            self.locals.append(new_symbol)
+            self.emit(("SET_LOCAL" , str(len(self.locals) -1) + f" [{new_symbol.name}]"))
+
 
     
 
